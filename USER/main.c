@@ -19,15 +19,18 @@ int main(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
 	GPIO_Init(GPIOB,&GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
-	GPIO_Init(GPIOE,&GPIO_InitStructure);
-
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
 	GPIO_Init(GPIOG,&GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
+	GPIO_Init(GPIOE,&GPIO_InitStructure);
 
 	while(1)
 	{
 		int i;
+		BrightAll(0);
+
 		if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 1)
 		{
 			while(1)
