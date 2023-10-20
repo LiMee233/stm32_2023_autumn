@@ -48,9 +48,9 @@ int main(void)
 					}
 			}
 		}
-		else if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2) == 0)
+		if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2) == 0)
 		{
-			for(i=0; i <= 1; i++)
+			for(i=0; i < 1; i++)
 			{
 				GPIO_ResetBits(GPIOG, GPIO_Pin_6);
 				delay_ms(500);
@@ -58,33 +58,33 @@ int main(void)
 				delay_ms(500);
 			}
 		}
-		else if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3) == 0)
+		if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3) == 0)
 		{
-			for(i=0; i <= 2; i++)
+			for(i=0; i < 2; i++)
 			{
-				GPIO_ResetBits(GPIOG, GPIO_Pin_7);
+				GPIO_ResetBits(GPIOA, GPIO_Pin_8);
 				delay_ms(500);
-				GPIO_SetBits(GPIOG, GPIO_Pin_7);
+				GPIO_SetBits(GPIOA, GPIO_Pin_8);
 				delay_ms(500);
 			}
 		}
-		else if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == 0)
+		if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == 0)
 		{
-			for(i=0; i <= 3; i++)
+			for(i=0; i < 3; i++)
 			{
-				GPIO_ResetBits(GPIOG, GPIO_Pin_8);
+				GPIO_ResetBits(GPIOB, GPIO_Pin_8);
 				delay_ms(500);
-				GPIO_SetBits(GPIOG, GPIO_Pin_8);
+				GPIO_SetBits(GPIOB, GPIO_Pin_8);
 				delay_ms(500);
 			}
 		}
-		else if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5) == 0)
+		if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5) == 0)
 		{
-			for(i=0; i <= 4; i++)
+			for(i=0; i < 4; i++)
 			{
-				GPIO_ResetBits(GPIOG, GPIO_Pin_9);
+				GPIO_ResetBits(GPIOB, GPIO_Pin_9);
 				delay_ms(500);
-				GPIO_SetBits(GPIOG, GPIO_Pin_9);
+				GPIO_SetBits(GPIOB, GPIO_Pin_9);
 				delay_ms(500);
 			}
 		}
