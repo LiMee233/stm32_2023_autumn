@@ -64,7 +64,7 @@ void InitEXTI(void)
     */
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
-	currentGPIOInitStrut.GPIO_Pin = GPIO_Pin_3; // 疑问：如果在这里设置 3，后面再执行 GPIO_Init，那是会覆盖旧值，还是合并呢？
+	currentGPIOInitStrut.GPIO_Pin = GPIO_Pin_3; // 疑问：如果在这里设置 3，后面再执行 GPIO_Init，那是会覆盖旧值，还是合并呢？（答案：合并）
 	currentGPIOInitStrut.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(GPIOE, &currentGPIOInitStrut);
 
@@ -81,20 +81,20 @@ void InitEXTI(void)
 	currentNVICInitStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&currentNVICInitStruct);
 
-	/*-------------------- 初始化外部中断 0 --------------------*/
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	currentGPIOInitStrut.GPIO_Pin = GPIO_Pin_0;
+	/*-------------------- 初始化外部中断 1 --------------------*/
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
+	currentGPIOInitStrut.GPIO_Pin = GPIO_Pin_1;
 	currentGPIOInitStrut.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(GPIOA, &currentGPIOInitStrut);
+	GPIO_Init(GPIOE, &currentGPIOInitStrut);
 
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);
-	currentEXTIInitStruct.EXTI_Line = EXTI_Line0;
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource1);
+	currentEXTIInitStruct.EXTI_Line = EXTI_Line1;
 	currentEXTIInitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
 	currentEXTIInitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
 	currentEXTIInitStruct.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&currentEXTIInitStruct);
 
-	currentNVICInitStruct.NVIC_IRQChannel = EXTI0_IRQn;
+	currentNVICInitStruct.NVIC_IRQChannel = EXTI1_IRQn;
 	currentNVICInitStruct.NVIC_IRQChannelPreemptionPriority = 1;
 	currentNVICInitStruct.NVIC_IRQChannelSubPriority = 1;
 	currentNVICInitStruct.NVIC_IRQChannelCmd = ENABLE;

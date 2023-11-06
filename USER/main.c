@@ -28,17 +28,18 @@ enum MoveDirection
 
 int main(void /* 给予函数 void 类型参数后，此函数被调用时不能传入任何参数，应该是为了代码安全考虑 */)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; // Or GPIO_Mode_IPU?
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOB,&GPIO_InitStructure);
-	GPIO_SetBits(GPIOB, GPIO_Pin_8);
-	delay_ms(250);
-	GPIO_ResetBits(GPIOB, GPIO_Pin_8);
-	delay_ms(250);
-	GPIO_SetBits(GPIOB, GPIO_Pin_8);
+	// 点亮 LED 灯的初始化，方便调试
+	// GPIO_InitTypeDef GPIO_InitStructure;
+	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+	// GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	// GPIO_Init(GPIOB,&GPIO_InitStructure);
+	// GPIO_SetBits(GPIOB, GPIO_Pin_8);
+	// delay_ms(250);
+	// GPIO_ResetBits(GPIOB, GPIO_Pin_8);
+	// delay_ms(250);
+	// GPIO_SetBits(GPIOB, GPIO_Pin_8);
 
 	//初始化OLED所用到的IO口
 	SPI_GPIO_Init();
@@ -52,7 +53,7 @@ int main(void /* 给予函数 void 类型参数后，此函数被调用时不能
 
 	while(true)
 	{
-		// Do nothing.
+		// Wating for EXTI.
 	}
 }
 
@@ -119,7 +120,7 @@ void ShowScreenOnce(enum MoveDirection currentMoveDirection)
 	if(currentMoveDirection == MoveDirection_Left)
 		currentManualMoveModeMarginLeft = 
 			(currentManualMoveModeMarginLeft <= 16) ? 128 : currentManualMoveModeMarginLeft - 16;
-	else
+	else if(currentMoveDirection == MoveDirection_Right)
 		currentManualMoveModeMarginLeft =
 			(currentManualMoveModeMarginLeft >= 128 - 16) ? 0 : currentManualMoveModeMarginLeft + 16;
 
@@ -139,16 +140,14 @@ int IsOtherEXTISetExpectEXTI_Line2(void)
 {
 	return 	EXTI_GetITStatus(EXTI_Line3) == SET ||
 			EXTI_GetITStatus(EXTI_Line0) == SET ||
-			EXTI_GetITStatus(EXTI_Line4) == SET ||
-			EXTI_GetITStatus(EXTI_Line5) == SET;
+			EXTI_GetITStatus(EXTI_Line1) == SET;
 }
 
 int IsOtherEXTISetExpectEXTI_Line3(void)
 {
 	return 	EXTI_GetITStatus(EXTI_Line2) == SET ||
 			EXTI_GetITStatus(EXTI_Line0) == SET ||
-			EXTI_GetITStatus(EXTI_Line4) == SET ||
-			EXTI_GetITStatus(EXTI_Line5) == SET;
+			EXTI_GetITStatus(EXTI_Line1) == SET;
 }
 
 // 中断服务程序
@@ -172,27 +171,22 @@ void EXTI3_IRQHandler(void)
 	EXTI_ClearITPendingBit(EXTI_Line3);
 }
 
-void EXTI0_IRQHandler(void)
+void EXTI1_IRQHandler(void)
 {
-	if(EXTI_GetITStatus(EXTI_Line0) == SET)
+	if(EXTI_GetITStatus(EXTI_Line1) == SET)
 	{
-		GPIO_SetBits(GPIOB, GPIO_Pin_8);
-		delay_ms(500);
-		GPIO_ResetBits(GPIOB, GPIO_Pin_8);
-		delay_ms(500);
-		GPIO_SetBits(GPIOB, GPIO_Pin_8);
-
 		IsManualMoveModeEnabled = true;
 		ShowScreenOnce(MoveDirection_None);
 	}
-	EXTI_ClearITPendingBit(EXTI_Line0);
+	EXTI_ClearITPendingBit(EXTI_Line1);
 }
 
 void EXTI4_IRQHandler(void)
 {
 	if(EXTI_GetITStatus(EXTI_Line4) == SET)
 	{
-		ShowScreenOnce(MoveDirection_Left);
+		if(IsManualMoveModeEnabled == true)
+			ShowScreenOnce(MoveDirection_Left);
 	}
 	EXTI_ClearITPendingBit(EXTI_Line4);
 }
@@ -201,7 +195,8 @@ void EXTI9_5_IRQHandler(void)
 {
 	if(EXTI_GetITStatus(EXTI_Line5) == SET)
 	{
-		ShowScreenOnce(MoveDirection_Right);
+		if(IsManualMoveModeEnabled == true)
+			ShowScreenOnce(MoveDirection_Right);
 	}
 	EXTI_ClearITPendingBit(EXTI_Line5);
 }
