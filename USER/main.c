@@ -116,24 +116,22 @@ void ShowScrollScreen(void)
 // 单次显示内容（包含偏移）
 void ShowScreenOnce(enum MoveDirection currentMoveDirection)
 {	
-	int currentManualMoveModeMarginLeft = ManualMoveModeMarginLeft;
 	if(currentMoveDirection == MoveDirection_Left)
-		currentManualMoveModeMarginLeft = 
-			(currentManualMoveModeMarginLeft <= 16) ? 128 : currentManualMoveModeMarginLeft - 16;
+		ManualMoveModeMarginLeft = 
+			(ManualMoveModeMarginLeft <= 16) ? 128 : ManualMoveModeMarginLeft - 16;
 	else if(currentMoveDirection == MoveDirection_Right)
-		currentManualMoveModeMarginLeft =
-			(currentManualMoveModeMarginLeft >= 128 - 16) ? 0 : currentManualMoveModeMarginLeft + 16;
+		ManualMoveModeMarginLeft =
+			(ManualMoveModeMarginLeft >= 128 - 16) ? 0 : ManualMoveModeMarginLeft + 16;
 
 	OLED_Fill(0x00);
 
 	// 第一行：名字
 	for(i=0; i<3; i++)
 	{
-		LCD_P16x16Ch(i*16 + 3 + currentManualMoveModeMarginLeft, 2, i+8);
+		LCD_P16x16Ch(i*16 + 3 + ManualMoveModeMarginLeft, 2, i+8);
 	}
 	// 第二行：学号
-	LCD_P8x16Str(currentManualMoveModeMarginLeft, 4, "200385");
-	ManualMoveModeMarginLeft = currentManualMoveModeMarginLeft;
+	LCD_P8x16Str(ManualMoveModeMarginLeft, 4, "200385");
 }
 
 int IsOtherEXTISetExpectEXTI_Line2(void)
