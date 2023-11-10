@@ -181,20 +181,24 @@ void EXTI1_IRQHandler(void)
 
 void EXTI4_IRQHandler(void)
 {
+	delay_ms(100);
 	if(EXTI_GetITStatus(EXTI_Line4) == SET)
 	{
 		if(IsManualMoveModeEnabled == true)
 			ShowScreenOnce(MoveDirection_Left);
 	}
+	delay_ms(100);
 	EXTI_ClearITPendingBit(EXTI_Line4);
 }
 
 void EXTI9_5_IRQHandler(void)
 {
+	delay_ms(100);
 	if(EXTI_GetITStatus(EXTI_Line5) == SET)
 	{
 		if(IsManualMoveModeEnabled == true)
 			ShowScreenOnce(MoveDirection_Right);
 	}
+	delay_ms(100);
 	EXTI_ClearITPendingBit(EXTI_Line5);
 }
