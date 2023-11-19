@@ -3,53 +3,61 @@
 #include "delay.h"
 #include "exti_init.h"
 #include "exti_handler.h"
+#include "timer_init.h"
 
 #define true 1
 #define false 0
 
-void ShowTwoScreen(void);
-void ShowScrollScreen(void);
-
-int IsOtherEXTISetExpectEXTI_Line2(void);
-int IsOtherEXTISetExpectEXTI_Line3(void);
-
+uint8_t ScrollMarginLeft = 0;
 uint8_t i = 0;
 uint8_t j = 0;
 
-uint8_t IsManualMoveModeEnabled = 0;
-uint8_t ManualMoveModeMarginLeft = 0; // 最大是 128，此时完全移出。
-
-enum MoveDirection
+enum
 {
-	MoveDirection_Left = 0,
-	MoveDirection_Right,
-	MoveDirection_None
-};
+	WorkingMode_Null = 0,
+	WorkingMode_TwoScreen,
+	WorkingMode_ScrollScreen,
+} WorkingMode;
+
+enum
+{
+	NowScreen_HEBUT = 0,
+	NowScreen_Own
+} NowScreen;
+
+void Warn(void);
+void ShowTwoScreenOnce(void);
+void ShowScrollScreenOnce(void);
 
 int main(void /* 给予函数 void 类型参数后，此函数被调用时不能传入任何参数，应该是为了代码安全考虑 */)
 {
-	// 点亮 LED 灯的初始化，方便调试
-	// GPIO_InitTypeDef GPIO_InitStructure;
-	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
-	// GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
-	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	// GPIO_Init(GPIOB,&GPIO_InitStructure);
-	// GPIO_SetBits(GPIOB, GPIO_Pin_8);
-	// delay_ms(250);
-	// GPIO_ResetBits(GPIOB, GPIO_Pin_8);
-	// delay_ms(250);
-	// GPIO_SetBits(GPIOB, GPIO_Pin_8);
+	GPIO_InitTypeDef GPIO_InitStructure;
 
-	//初始化OLED所用到的IO口
+	// 定义默认功能模式
+	WorkingMode = WorkingMode_Null;
+	NowScreen = NowScreen_HEBUT;
+
+	// 初始化 OLED
 	SPI_GPIO_Init();
-	//初始化OLED屏
 	OLED_Init();
-	//清屏操作
 	OLED_Fill(0x00);
 
 	// 初始化外部中断
 	InitEXTI();
+
+	// 初始化用户时钟
+	InitTIM3();
+	InitTIM2();
+	InitTIM4();
+
+	// 初始化 LED 灯和蜂鸣器
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOG,ENABLE);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOG,&GPIO_InitStructure);
+	GPIO_SetBits(GPIOG, GPIO_Pin_6);
+	GPIO_ResetBits(GPIOG, GPIO_Pin_7);
 
 	while(true)
 	{
@@ -57,23 +65,17 @@ int main(void /* 给予函数 void 类型参数后，此函数被调用时不能
 	}
 }
 
-// 循环显示两屏内容
-void ShowTwoScreen(void)
+void Warn(void)
 {
-	while(true)
+	GPIO_ResetBits(GPIOG, GPIO_Pin_6);
+	GPIO_SetBits(GPIOG, GPIO_Pin_7);
+	EnableTIM4();
+}
+
+void ShowTwoScreenOnce(void)
+{
+	if(NowScreen == NowScreen_HEBUT)
 	{
-		OLED_Fill(0x00);
-
-		// 第一行：河里工业大学生日快乐
-		for(i=0; i<8; i++)
-		{
-			LCD_P16x16Ch(i*16, 2, i);
-		}
-
-		if(IsOtherEXTISetExpectEXTI_Line2() == true)
-			return;
-		delay_ms(500);
-
 		OLED_Fill(0x00);
 
 		// 第一行：名字
@@ -84,68 +86,43 @@ void ShowTwoScreen(void)
 		// 第二行：学号
 		LCD_P8x16Str(40, 4, "200385");
 
-		if(IsOtherEXTISetExpectEXTI_Line2() == true)
-			return;
-		delay_ms(500);
+		NowScreen = NowScreen_Own;
 	}
-}
-
-// 滚动显示内容
-void ShowScrollScreen(void)
-{
-	while(true)
+	else if(NowScreen == NowScreen_Own)
 	{
-		for(j=0; j<128; j++)
+		OLED_Fill(0x00);
+
+		// 第一行：河里工业大学生日快乐
+		for(i=0; i<8; i++)
 		{
-			if(IsOtherEXTISetExpectEXTI_Line3() == true)
-				return;
-			delay_ms(10);
-			OLED_Fill(0x00);
-			
-			// 第一行：名字
-			for(i=0; i<3; i++)
-			{
-				LCD_P16x16Ch(i*16 + j + 3, 2, i+8);
-			}
-			// 第二行：学号
-			LCD_P8x16Str(j, 4, "200385");
+			LCD_P16x16Ch(i*16, 2, i);
 		}
+
+		NowScreen = NowScreen_HEBUT;
 	}
 }
 
-// 单次显示内容（包含偏移）
-void ShowScreenOnce(enum MoveDirection currentMoveDirection)
-{	
-	if(currentMoveDirection == MoveDirection_Left)
-		ManualMoveModeMarginLeft = 
-			(ManualMoveModeMarginLeft <= 16) ? 128 : ManualMoveModeMarginLeft - 16;
-	else if(currentMoveDirection == MoveDirection_Right)
-		ManualMoveModeMarginLeft =
-			(ManualMoveModeMarginLeft >= 128 - 16) ? 0 : ManualMoveModeMarginLeft + 16;
+void ShowScrollScreenOnce(void)
+{
+	if(ScrollMarginLeft >= 128)
+	{
+		Warn();
+		ScrollMarginLeft = 0;
+	}
+	else
+	{
+		ScrollMarginLeft += 16;
+	}
 
 	OLED_Fill(0x00);
-
+	
 	// 第一行：名字
 	for(i=0; i<3; i++)
 	{
-		LCD_P16x16Ch(i*16 + 3 + ManualMoveModeMarginLeft, 2, i+8);
+		LCD_P16x16Ch(i*16 + ScrollMarginLeft + 3, 2, i+8);
 	}
 	// 第二行：学号
-	LCD_P8x16Str(ManualMoveModeMarginLeft, 4, "200385");
-}
-
-int IsOtherEXTISetExpectEXTI_Line2(void)
-{
-	return 	EXTI_GetITStatus(EXTI_Line3) == SET ||
-			EXTI_GetITStatus(EXTI_Line0) == SET ||
-			EXTI_GetITStatus(EXTI_Line1) == SET;
-}
-
-int IsOtherEXTISetExpectEXTI_Line3(void)
-{
-	return 	EXTI_GetITStatus(EXTI_Line2) == SET ||
-			EXTI_GetITStatus(EXTI_Line0) == SET ||
-			EXTI_GetITStatus(EXTI_Line1) == SET;
+	LCD_P8x16Str(ScrollMarginLeft, 4, "200385");
 }
 
 // 中断服务程序
@@ -153,8 +130,11 @@ void EXTI2_IRQHandler(void)
 {
 	if(EXTI_GetITStatus(EXTI_Line2) == SET)
 	{
-		IsManualMoveModeEnabled = false;
-		ShowTwoScreen();
+		ShowTwoScreenOnce();
+		EnableTIM3();
+		DisableTIM2();
+		WorkingMode = WorkingMode_TwoScreen;
+		Warn();
 	}
 	EXTI_ClearITPendingBit(EXTI_Line2);
 }
@@ -163,42 +143,46 @@ void EXTI3_IRQHandler(void)
 {
 	if(EXTI_GetITStatus(EXTI_Line3) == SET)
 	{
-		IsManualMoveModeEnabled = false;
-		ShowScrollScreen();
+		ShowScrollScreenOnce();
+		EnableTIM2();
+		DisableTIM3();
+		WorkingMode = WorkingMode_ScrollScreen;
+		Warn();
 	}
 	EXTI_ClearITPendingBit(EXTI_Line3);
 }
 
-void EXTI1_IRQHandler(void)
+void TIM3_IRQHandler(void)
 {
-	if(EXTI_GetITStatus(EXTI_Line1) == SET)
+	if(TIM_GetITStatus(TIM3,TIM_IT_Update) != RESET)
 	{
-		IsManualMoveModeEnabled = true;
-		ShowScreenOnce(MoveDirection_None);
+		if(WorkingMode == WorkingMode_TwoScreen)
+		{
+			ShowTwoScreenOnce();
+		}
+		TIM_ClearFlag(TIM3, TIM_FLAG_Update);
 	}
-	EXTI_ClearITPendingBit(EXTI_Line1);
 }
 
-void EXTI4_IRQHandler(void)
+void TIM2_IRQHandler(void)
 {
-	delay_ms(100);
-	if(EXTI_GetITStatus(EXTI_Line4) == SET)
+	if(TIM_GetITStatus(TIM2,TIM_IT_Update) != RESET)
 	{
-		if(IsManualMoveModeEnabled == true)
-			ShowScreenOnce(MoveDirection_Left);
+		if(WorkingMode == WorkingMode_ScrollScreen)
+		{
+			ShowScrollScreenOnce();
+		}
+		TIM_ClearFlag(TIM2, TIM_FLAG_Update);
 	}
-	delay_ms(100);
-	EXTI_ClearITPendingBit(EXTI_Line4);
 }
 
-void EXTI9_5_IRQHandler(void)
+void TIM4_IRQHandler(void)
 {
-	delay_ms(100);
-	if(EXTI_GetITStatus(EXTI_Line5) == SET)
+	if(TIM_GetITStatus(TIM4,TIM_IT_Update) != RESET)
 	{
-		if(IsManualMoveModeEnabled == true)
-			ShowScreenOnce(MoveDirection_Right);
+		GPIO_SetBits(GPIOG, GPIO_Pin_6);
+		GPIO_ResetBits(GPIOG, GPIO_Pin_7);
+		TIM_ClearFlag(TIM4, TIM_FLAG_Update);
+		DisableTIM4();
 	}
-	delay_ms(100);
-	EXTI_ClearITPendingBit(EXTI_Line5);
 }
