@@ -1,6 +1,6 @@
 #include "stm32f10x.h"
 
-uint16_t GetPrescalerFromMillisecond(int);
+uint16_t GetPrescalerFromMillisecond(TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct, int millisecond);
 void InitTIM3(void);
 void EnableTIM3(void);
 void DisableTIM3(void);

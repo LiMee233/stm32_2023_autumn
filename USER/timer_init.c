@@ -1,10 +1,10 @@
 #include "stm32f10x.h"
 #include "timer_init.h"
 
-// 当且仅当 TIM_Period = 9999，TimeClockFren = 72M 时
-uint16_t GetPrescalerFromMillisecond(int millisecond)
+// 当且仅当 TimeClockFren = 72M 时
+uint16_t GetPrescalerFromMillisecond(TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct, int millisecond)
 {
-	return (uint16_t)(7.2 * millisecond - 1);
+	return (uint16_t)((double)(millisecond * 1000) / ((TIM_TimeBaseInitStruct.TIM_Period + 1) / 72) - 1);
 }
 
 void InitTIM3(void)
@@ -20,7 +20,7 @@ void InitTIM3(void)
 	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1; // 设置了时钟分割(Tck_tim) 
 	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up; // 选择了计数器模式(TIM向上计数模式) 
 	TIM_TimeBaseInitStruct.TIM_Period = 9999; // 设定计数器自动重装值,取值范围0x0000~0xFFFF
-	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(1000); // 设置用来作为TIM3时钟频率除数的预分频值为(7199+1),取值范围0x0000~0xFFFF
+	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(TIM_TimeBaseInitStruct, 1000); // 设置用来作为TIM3时钟频率除数的预分频值为(7199+1),取值范围0x0000~0xFFFF
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStruct);
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); // NVIC_Group:先占优先级2位，从优先级2位
@@ -56,7 +56,7 @@ void InitTIM2(void)
 	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInitStruct.TIM_Period = 9999;
-	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(100);
+	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(TIM_TimeBaseInitStruct, 100);
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStruct);
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
@@ -92,7 +92,7 @@ void InitTIM4(void)
 	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInitStruct.TIM_Period = 9999;
-	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(100);
+	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(TIM_TimeBaseInitStruct, 100);
 	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseInitStruct);
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
