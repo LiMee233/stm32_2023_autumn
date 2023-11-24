@@ -80,6 +80,17 @@ void DisableTIM2(void)
 	TIM_Cmd(TIM2, DISABLE);
 }
 
+void TIM2ChangeTime(int millisecond)
+{
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
+
+	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInitStruct.TIM_Period = 9999;
+	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(TIM_TimeBaseInitStruct, millisecond);
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStruct);
+}
+
 void InitTIM4(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;

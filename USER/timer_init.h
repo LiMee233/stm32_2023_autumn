@@ -8,6 +8,7 @@ void DisableTIM3(void);
 void InitTIM2(void);
 void EnableTIM2(void);
 void DisableTIM2(void);
+void TIM2ChangeTime(int);
 
 void InitTIM4(void);
 void EnableTIM4(void);

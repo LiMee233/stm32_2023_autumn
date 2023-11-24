@@ -9,6 +9,7 @@
 #define false 0
 
 uint8_t ScrollMarginLeft = 0;
+int TIM2TickMilliseconds = 100;
 uint8_t i = 0;
 uint8_t j = 0;
 
@@ -150,6 +151,26 @@ void EXTI3_IRQHandler(void)
 		Warn();
 	}
 	EXTI_ClearITPendingBit(EXTI_Line3);
+}
+
+void EXTI4_IRQHandler(void)
+{
+	if(EXTI_GetITStatus(EXTI_Line4) == SET)
+	{
+		TIM2TickMilliseconds = TIM2TickMilliseconds > 10 ? TIM2TickMilliseconds - 10 : 10;
+		TIM2ChangeTime(TIM2TickMilliseconds);
+	}
+	EXTI_ClearITPendingBit(EXTI_Line4);
+}
+
+void EXTI9_5_IRQHandler(void)
+{
+	if(EXTI_GetITStatus(EXTI_Line5) == SET)
+	{
+		TIM2TickMilliseconds = TIM2TickMilliseconds < 1000 ? TIM2TickMilliseconds + 10 : 1000;
+		TIM2ChangeTime(TIM2TickMilliseconds);
+	}
+	EXTI_ClearITPendingBit(EXTI_Line5);
 }
 
 void TIM3_IRQHandler(void)
