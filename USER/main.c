@@ -10,7 +10,7 @@ uint8_t ScrollMarginLeft = 0;
 int TIM2TickMilliseconds = 100;
 uint8_t WritingCustomIDIndex = 6;
 char num2chartable[11] = "0123456789";
-char currentID[7] = "000000"; // LCD_P8x16Str 方法虽然接受 uint8_t[] 类型参数，但实际上只有传入 char[] 类型参数才能正常工作，字符串最后有 '\0' 所以多一位
+char currentID[7] = "000000";
 
 uint8_t i = 0;
 uint8_t j = 0;
@@ -61,19 +61,19 @@ int main(void /* 给予函数 void 类型参数后，此函数被调用时不能
 
 	while(1)
 	{
-		if((NowTickIRQ & NowTickIRQ_TIM2) && 1)
+		if(NowTickIRQ & NowTickIRQ_TIM2)
 			ShowScrollScreenOnce(); // 滚动一下屏幕
-		else if((NowTickIRQ & NowTickIRQ_TIM3) && 1)
+		else if(NowTickIRQ & NowTickIRQ_TIM3)
 			ShowTwoScreenOnce(); // 双屏显示，切换下一屏
 
-		if((NowTickIRQ & NowTickIRQ_TIM4) && 1)
+		if(NowTickIRQ & NowTickIRQ_TIM4)
 		{
 			// 把灯和蜂鸣器关了，之后再把自己关了
 			GPIO_SetBits(GPIOG, GPIO_Pin_6);
 			GPIO_ResetBits(GPIOG, GPIO_Pin_7);
 			DisableTIM4();
 		}
-		if((NowTickIRQ & NowTickIRQ_USART1) && 1)
+		if(NowTickIRQ & NowTickIRQ_USART1)
 		{
 			if(WritingCustomIDIndex < 6)
 			{
