@@ -1,11 +1,16 @@
 #include "stm32f10x.h"
-#include "timer_init.h"
+#include "timer.h"
+#include "def.h"
+
+extern enum NOW_TICK_IRQ NowTickIRQ;
 
 // 当且仅当 TimeClockFren = 72M 时
 uint16_t GetPrescalerFromMillisecond(TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct, int millisecond)
 {
 	return (uint16_t)((double)(millisecond * 1000) / ((TIM_TimeBaseInitStruct.TIM_Period + 1) / 72) - 1);
 }
+
+/************************ TIM3 ************************/
 
 void InitTIM3(void)
 {
@@ -43,6 +48,17 @@ void DisableTIM3(void)
 	TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
 	TIM_Cmd(TIM3, DISABLE);
 }
+
+void TIM3_IRQHandler(void)
+{
+	if(TIM_GetITStatus(TIM3,TIM_IT_Update) != RESET)
+	{
+		NowTickIRQ += NowTickIRQ_TIM3;
+		TIM_ClearFlag(TIM3, TIM_FLAG_Update);
+	}
+}
+
+/************************ TIM2 ************************/
 
 void InitTIM2(void)
 {
@@ -91,6 +107,17 @@ void TIM2ChangeTime(int millisecond)
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStruct);
 }
 
+void TIM2_IRQHandler(void)
+{
+	if(TIM_GetITStatus(TIM2,TIM_IT_Update) != RESET)
+	{
+		NowTickIRQ += NowTickIRQ_TIM2;
+		TIM_ClearFlag(TIM2, TIM_FLAG_Update);
+	}
+}
+
+/************************ TIM4 ************************/
+
 void InitTIM4(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
@@ -125,4 +152,13 @@ void DisableTIM4(void)
 {
 	TIM_ITConfig(TIM4, TIM_IT_Update, DISABLE);
 	TIM_Cmd(TIM4, DISABLE);
+}
+
+void TIM4_IRQHandler(void)
+{
+	if(TIM_GetITStatus(TIM4,TIM_IT_Update) != RESET)
+	{
+		NowTickIRQ += NowTickIRQ_TIM4;
+		TIM_ClearFlag(TIM4, TIM_FLAG_Update);
+	}
 }

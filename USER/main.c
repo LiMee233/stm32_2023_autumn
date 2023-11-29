@@ -1,30 +1,29 @@
 #include "stm32f10x.h"
 #include "oled.h"
 #include "delay.h"
-#include "exti_init.h"
-#include "exti_handler.h"
-#include "timer_init.h"
-
-#define true 1
-#define false 0
+#include "timer.h"
+#include "usart.h"
+#include "def.h"
+#include "stdio.h"
 
 uint8_t ScrollMarginLeft = 0;
 int TIM2TickMilliseconds = 100;
+uint8_t WritingCustomIDIndex = 6;
+char num2chartable[11] = "0123456789";
+char currentID[7] = "000000"; // LCD_P8x16Str 方法虽然接受 uint8_t[] 类型参数，但实际上只有传入 char[] 类型参数才能正常工作，字符串最后有 '\0' 所以多一位
+
 uint8_t i = 0;
 uint8_t j = 0;
-
-enum
-{
-	WorkingMode_Null = 0,
-	WorkingMode_TwoScreen,
-	WorkingMode_ScrollScreen,
-} WorkingMode;
 
 enum
 {
 	NowScreen_HEBUT = 0,
 	NowScreen_Own
 } NowScreen;
+
+enum NOW_TICK_IRQ NowTickIRQ;
+
+extern uint8_t Serial_RxData;
 
 void Warn(void);
 void ShowTwoScreenOnce(void);
@@ -35,7 +34,7 @@ int main(void /* 给予函数 void 类型参数后，此函数被调用时不能
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	// 定义默认功能模式
-	WorkingMode = WorkingMode_Null;
+	NowTickIRQ = NowTickIRQ_Null;
 	NowScreen = NowScreen_HEBUT;
 
 	// 初始化 OLED
@@ -43,8 +42,8 @@ int main(void /* 给予函数 void 类型参数后，此函数被调用时不能
 	OLED_Init();
 	OLED_Fill(0x00);
 
-	// 初始化外部中断
-	InitEXTI();
+	// 初始化串口
+	Serial_Init();
 
 	// 初始化用户时钟
 	InitTIM3();
@@ -60,9 +59,61 @@ int main(void /* 给予函数 void 类型参数后，此函数被调用时不能
 	GPIO_SetBits(GPIOG, GPIO_Pin_6);
 	GPIO_ResetBits(GPIOG, GPIO_Pin_7);
 
-	while(true)
+	while(1)
 	{
-		// Wating for EXTI.
+		if((NowTickIRQ & NowTickIRQ_TIM2) && 1)
+			ShowScrollScreenOnce(); // 滚动一下屏幕
+		else if((NowTickIRQ & NowTickIRQ_TIM3) && 1)
+			ShowTwoScreenOnce(); // 双屏显示，切换下一屏
+
+		if((NowTickIRQ & NowTickIRQ_TIM4) && 1)
+		{
+			// 把灯和蜂鸣器关了，之后再把自己关了
+			GPIO_SetBits(GPIOG, GPIO_Pin_6);
+			GPIO_ResetBits(GPIOG, GPIO_Pin_7);
+			DisableTIM4();
+		}
+		if((NowTickIRQ & NowTickIRQ_USART1) && 1)
+		{
+			if(WritingCustomIDIndex < 6)
+			{
+				currentID[WritingCustomIDIndex] = num2chartable[Serial_RxData];
+				WritingCustomIDIndex ++;
+			}
+			else
+			{
+				switch(Serial_RxData)
+				{
+					case 1:
+						EnableTIM3();
+						DisableTIM2();
+						Warn();
+					break;
+					case 2:
+						EnableTIM2();
+						DisableTIM3();
+						Warn();
+					break;
+					case 3:
+						TIM2TickMilliseconds = TIM2TickMilliseconds > 10 ? TIM2TickMilliseconds - 10 : 10;
+						TIM2ChangeTime(TIM2TickMilliseconds);
+					break;
+					case 4:
+						TIM2TickMilliseconds = TIM2TickMilliseconds < 500 ? TIM2TickMilliseconds + 10 : 500;
+						TIM2ChangeTime(TIM2TickMilliseconds);
+					break;
+					case 5:
+						WritingCustomIDIndex = 0;
+					break;
+				}
+			}
+		}
+
+		// 执行过任何一个中断应执行的代码后，就将「该执行的中断代码」清空，避免重复执行
+		NowTickIRQ = NowTickIRQ_Null;
+
+		// 添加一个延时，给处理器一点响应时间，否则会特别卡
+		delay_ms(10);
 	}
 }
 
@@ -85,7 +136,7 @@ void ShowTwoScreenOnce(void)
 			LCD_P16x16Ch(i*16 + 40, 2, i+8);
 		}
 		// 第二行：学号
-		LCD_P8x16Str(40, 4, "200385");
+		LCD_P8x16Str(40, 4, currentID);
 
 		NowScreen = NowScreen_Own;
 	}
@@ -123,87 +174,5 @@ void ShowScrollScreenOnce(void)
 		LCD_P16x16Ch(i*16 + ScrollMarginLeft + 3, 2, i+8);
 	}
 	// 第二行：学号
-	LCD_P8x16Str(ScrollMarginLeft, 4, "200385");
-}
-
-// 中断服务程序
-void EXTI2_IRQHandler(void)
-{
-	if(EXTI_GetITStatus(EXTI_Line2) == SET)
-	{
-		ShowTwoScreenOnce();
-		EnableTIM3();
-		DisableTIM2();
-		WorkingMode = WorkingMode_TwoScreen;
-		Warn();
-	}
-	EXTI_ClearITPendingBit(EXTI_Line2);
-}
-
-void EXTI3_IRQHandler(void)
-{
-	if(EXTI_GetITStatus(EXTI_Line3) == SET)
-	{
-		ShowScrollScreenOnce();
-		EnableTIM2();
-		DisableTIM3();
-		WorkingMode = WorkingMode_ScrollScreen;
-		Warn();
-	}
-	EXTI_ClearITPendingBit(EXTI_Line3);
-}
-
-void EXTI4_IRQHandler(void)
-{
-	if(EXTI_GetITStatus(EXTI_Line4) == SET)
-	{
-		TIM2TickMilliseconds = TIM2TickMilliseconds > 10 ? TIM2TickMilliseconds - 10 : 10;
-		TIM2ChangeTime(TIM2TickMilliseconds);
-	}
-	EXTI_ClearITPendingBit(EXTI_Line4);
-}
-
-void EXTI9_5_IRQHandler(void)
-{
-	if(EXTI_GetITStatus(EXTI_Line5) == SET)
-	{
-		TIM2TickMilliseconds = TIM2TickMilliseconds < 1000 ? TIM2TickMilliseconds + 10 : 1000;
-		TIM2ChangeTime(TIM2TickMilliseconds);
-	}
-	EXTI_ClearITPendingBit(EXTI_Line5);
-}
-
-void TIM3_IRQHandler(void)
-{
-	if(TIM_GetITStatus(TIM3,TIM_IT_Update) != RESET)
-	{
-		if(WorkingMode == WorkingMode_TwoScreen)
-		{
-			ShowTwoScreenOnce();
-		}
-		TIM_ClearFlag(TIM3, TIM_FLAG_Update);
-	}
-}
-
-void TIM2_IRQHandler(void)
-{
-	if(TIM_GetITStatus(TIM2,TIM_IT_Update) != RESET)
-	{
-		if(WorkingMode == WorkingMode_ScrollScreen)
-		{
-			ShowScrollScreenOnce();
-		}
-		TIM_ClearFlag(TIM2, TIM_FLAG_Update);
-	}
-}
-
-void TIM4_IRQHandler(void)
-{
-	if(TIM_GetITStatus(TIM4,TIM_IT_Update) != RESET)
-	{
-		GPIO_SetBits(GPIOG, GPIO_Pin_6);
-		GPIO_ResetBits(GPIOG, GPIO_Pin_7);
-		TIM_ClearFlag(TIM4, TIM_FLAG_Update);
-		DisableTIM4();
-	}
+	LCD_P8x16Str(ScrollMarginLeft, 4, currentID);
 }

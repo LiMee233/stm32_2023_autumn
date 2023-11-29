@@ -429,6 +429,11 @@
               <FileType>1</FileType>
               <FilePath>..\STM32F10x_FWLib\src\stm32f10x_tim.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f10x_usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\STM32F10x_FWLib\src\stm32f10x_usart.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -468,14 +473,14 @@
               <FilePath>.\oledfont.c</FilePath>
             </File>
             <File>
-              <FileName>exti_init.c</FileName>
+              <FileName>timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\exti_init.c</FilePath>
+              <FilePath>.\timer.c</FilePath>
             </File>
             <File>
-              <FileName>timer_init.c</FileName>
+              <FileName>usart.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\timer_init.c</FilePath>
+              <FilePath>.\usart.c</FilePath>
             </File>
           </Files>
         </Group>
