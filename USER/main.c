@@ -85,11 +85,13 @@ int main(void /* 给予函数 void 类型参数后，此函数被调用时不能
 				switch(Serial_RxData)
 				{
 					case 1:
+						ShowTwoScreenOnce();
 						EnableTIM3();
 						DisableTIM2();
 						Warn();
 					break;
 					case 2:
+						ShowScrollScreenOnce();
 						EnableTIM2();
 						DisableTIM3();
 						Warn();
