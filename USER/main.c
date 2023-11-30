@@ -15,13 +15,6 @@ uint8_t j = 0;
 
 enum
 {
-	WorkingMode_Null = 0,
-	WorkingMode_TwoScreen,
-	WorkingMode_ScrollScreen,
-} WorkingMode;
-
-enum
-{
 	NowScreen_HEBUT = 0,
 	NowScreen_Own
 } NowScreen;
@@ -35,7 +28,6 @@ int main(void /* 给予函数 void 类型参数后，此函数被调用时不能
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	// 定义默认功能模式
-	WorkingMode = WorkingMode_Null;
 	NowScreen = NowScreen_HEBUT;
 
 	// 初始化 OLED
@@ -134,7 +126,6 @@ void EXTI2_IRQHandler(void)
 		ShowTwoScreenOnce();
 		EnableTIM3();
 		DisableTIM2();
-		WorkingMode = WorkingMode_TwoScreen;
 		Warn();
 	}
 	EXTI_ClearITPendingBit(EXTI_Line2);
@@ -147,7 +138,6 @@ void EXTI3_IRQHandler(void)
 		ShowScrollScreenOnce();
 		EnableTIM2();
 		DisableTIM3();
-		WorkingMode = WorkingMode_ScrollScreen;
 		Warn();
 	}
 	EXTI_ClearITPendingBit(EXTI_Line3);
@@ -177,10 +167,7 @@ void TIM3_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM3,TIM_IT_Update) != RESET)
 	{
-		if(WorkingMode == WorkingMode_TwoScreen)
-		{
-			ShowTwoScreenOnce();
-		}
+		ShowTwoScreenOnce();
 		TIM_ClearFlag(TIM3, TIM_FLAG_Update);
 	}
 }
@@ -189,10 +176,7 @@ void TIM2_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM2,TIM_IT_Update) != RESET)
 	{
-		if(WorkingMode == WorkingMode_ScrollScreen)
-		{
-			ShowScrollScreenOnce();
-		}
+		ShowScrollScreenOnce();
 		TIM_ClearFlag(TIM2, TIM_FLAG_Update);
 	}
 }
