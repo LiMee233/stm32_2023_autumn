@@ -7,6 +7,7 @@
 #include "stdio.h"
 
 uint8_t ScrollMarginLeft = 0;
+uint8_t ManualMoveModeMarginLeft = 0;
 int TIM2TickMilliseconds = 100;
 uint8_t WritingCustomIDIndex = 6;
 char num2chartable[11] = "0123456789";
@@ -21,6 +22,13 @@ enum
 	NowScreen_Own
 } NowScreen;
 
+enum MoveDirection
+{
+	MoveDirection_Left = 0,
+	MoveDirection_Right,
+	MoveDirection_None
+};
+
 enum NOW_TICK_IRQ NowTickIRQ;
 
 extern uint8_t Serial_RxData;
@@ -28,6 +36,7 @@ extern uint8_t Serial_RxData;
 void Warn(void);
 void ShowTwoScreenOnce(void);
 void ShowScrollScreenOnce(void);
+void ShowScreenOnce(enum MoveDirection);
 
 int main(void /* 给予函数 void 类型参数后，此函数被调用时不能传入任何参数，应该是为了代码安全考虑 */)
 {
@@ -111,6 +120,16 @@ int main(void /* 给予函数 void 类型参数后，此函数被调用时不能
 						DisableTIM3();
 						OLED_Fill(0x00);
 					break;
+					case 7:
+						DisableTIM2();
+						DisableTIM3();
+						ShowScreenOnce(MoveDirection_Left);
+					break;
+					case 8:
+						DisableTIM2();
+						DisableTIM3();
+						ShowScreenOnce(MoveDirection_Right);
+					break;
 				}
 			}
 		}
@@ -181,4 +200,27 @@ void ShowScrollScreenOnce(void)
 	}
 	// 第二行：学号
 	LCD_P8x16Str(ScrollMarginLeft, 4, currentID);
+}
+
+// 单次显示内容（包含偏移）
+void ShowScreenOnce(enum MoveDirection currentMoveDirection)
+{	
+	int currentManualMoveModeMarginLeft = ManualMoveModeMarginLeft;
+	if(currentMoveDirection == MoveDirection_Left)
+		currentManualMoveModeMarginLeft = 
+			(currentManualMoveModeMarginLeft <= 16) ? 128 : currentManualMoveModeMarginLeft - 16;
+	else
+		currentManualMoveModeMarginLeft =
+			(currentManualMoveModeMarginLeft >= 128 - 16) ? 0 : currentManualMoveModeMarginLeft + 16;
+
+	OLED_Fill(0x00);
+
+	// 第一行：名字
+	for(i=0; i<3; i++)
+	{
+		LCD_P16x16Ch(i*16 + 3 + currentManualMoveModeMarginLeft, 2, i+8);
+	}
+	// 第二行：学号
+	LCD_P8x16Str(currentManualMoveModeMarginLeft, 4, currentID);
+	ManualMoveModeMarginLeft = currentManualMoveModeMarginLeft;
 }
