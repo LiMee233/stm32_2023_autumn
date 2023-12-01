@@ -115,6 +115,7 @@ int main(void /* 给予函数 void 类型参数后，此函数被调用时不能
 					break;
 					case 5:
 						WritingCustomIDIndex = 0;
+					break;
 					case 6:
 						DisableTIM2();
 						DisableTIM3();
