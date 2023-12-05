@@ -2,6 +2,46 @@
 #include "oled.h"
 #include "delay.h"
 
+uint8_t OLED_Buffer[8][128] = {0}; // 按照页，8 行，128 列
+
+uint8_t oled_i, oled_j;
+
+// 清空 OLED 缓冲区
+void OLED_ClearBuffer(void)
+{
+	for(oled_i=0; oled_i<8; oled_i++)
+	{
+		for(oled_j=0; oled_j<128; oled_j++)
+		{
+			OLED_Buffer[oled_i][oled_j] = 0x00;
+		}
+	}
+}
+
+// 改变一个像素的状态
+// x：0~127；y：0~63；state：0 不亮，1 亮
+// 注意：实际上当 x=0 的时候，是不亮的，其他都亮
+void OLED_ChangeOnePixelInBuffer(uint8_t x, uint8_t y, uint8_t state)
+{
+	if(state)
+		OLED_Buffer[y / 8][x] |= (1 << (y % 8));
+	else
+		OLED_Buffer[y / 8][x] &= ~(1 << (y % 8));
+}
+
+// 将 OLED 缓冲区内的内容显示在屏幕上（需要较长时间，此段代码可能存在性能问题，但至少功能是有的）
+void OLED_ApplyBuffer(void)
+{
+	for(oled_i=0; oled_i<8; oled_i++)
+	{
+		for(oled_j=0; oled_j<128; oled_j++)
+		{
+			OLED_Set_Pos(oled_j, oled_i);
+			OLED_WrByte(OLED_Buffer[oled_i][oled_j], OLED_WR_DAT);
+		}
+	}
+}
+
 // 初始化 OLED 所用到的 IO 口
 void SPI_GPIO_Init(void)
 {

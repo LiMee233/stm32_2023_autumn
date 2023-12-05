@@ -29,8 +29,12 @@
 #define X_WIDTH      128
 #define Y_WIDTH      64
 
+extern void OLED_ClearBuffer(void);
+extern void OLED_ChangeOnePixelInBuffer(uint8_t x, uint8_t y, uint8_t state);
+extern void OLED_ApplyBuffer(void);
 
 extern void SPI_GPIO_Init(void);
+extern void OLED_WrByte(uint8_t dat,uint8_t mode);
 extern void OLED_Init(void);
 extern void OLED_Fill(uint8_t bmp_dat);
 extern void OLED_ShowChar(uint8_t x, uint8_t y, uint8_t chr);
