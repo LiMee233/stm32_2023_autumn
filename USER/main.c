@@ -4,7 +4,7 @@
 #include "adc.h"
 #include "usart.h"
 
-uint8_t i = 0;
+static uint8_t i = 0;
 
 uint8_t oled_x = 0;
 uint16_t ADC_value = 0;
