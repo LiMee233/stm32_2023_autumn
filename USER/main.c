@@ -4,6 +4,9 @@
 #include "oledfont.h"
 #include "adc.h"
 #include "usart.h"
+#include "exti.h"
+#include "timer.h"
+#include "stdio.h"
 
 static uint8_t i = 0;
 
@@ -16,6 +19,11 @@ uint8_t ADC_YPosition_Previous = 0;
 // 波形的相关参数设置
 uint8_t ADC_Y_Offset = 0; // 波形纵向位置的偏移
 uint16_t ADC_Value_Trigger = 0; // 边沿触发的值
+
+// 频率
+unsigned long FrequencyCounter = 0;
+unsigned long LastFrequency = 0;
+uint8_t LastFrequencyInString[7] = "000000";
 
 int main(void)
 {
@@ -30,6 +38,11 @@ int main(void)
 	// 初始化 OLED 屏
 	OLED_Init();
 
+	// 用于频率计算，依靠外部时钟，和下面的主循环似乎并没有关系
+	InitEXTI(); // 初始化外部中断
+	InitTIM3(); // 初始化定时器
+	EnableTIM3(); // 启用定时器
+
 	while(1){
 		// 先向缓冲区中添加背景
 		OLED_FillBackgroundInBuffer(OLED_Background_Buffer);
@@ -39,10 +52,10 @@ int main(void)
 		if(ADC_Value_Previous <= ADC_Value_Trigger && ADC_value >= ADC_Value_Trigger)
 		{
 			// 测量，并画点
-			for(oled_x=0; oled_x<128; oled_x++)
+			for(oled_x=2; oled_x<128; oled_x++)
 			{
 				// 上面检测边沿触发的时候，已经获取过一次 ADC_Value，所以第一次循环就不再测一次了
-				if(oled_x > 0)
+				if(oled_x > 2)
 					ADC_value = AD_GetValue();
 
 				ADC_YPosition = 63 - (int)((float)ADC_value / 4095 * 48) + ADC_Y_Offset; // 最下面一行是 63，蓝色显示部分高度为 48，此外还实现了波形纵向位置的偏移
@@ -89,8 +102,12 @@ int main(void)
 				ADC_YPosition_Previous = ADC_YPosition;
 			}
 
-			// 只有完成一次测量并绘图后，才需要更新缓冲区来显示屏幕内容
+			// 只有完成一次测量后，才需要将储存的图像刷新在屏幕上
 			OLED_ApplyBuffer();
+
+			// 获取上一次测量的频率，并显示（应该不会覆盖掉画的图）
+			sprintf(LastFrequencyInString, "%06d", LastFrequency);
+			LCD_P8x16Str(39, 0, LastFrequencyInString);
 		}
 
 		// 每完成一次测量，或者跳过一次测量，就将本次 ADC 最终获取的值，设置为上一次 ADC 获取的值。
