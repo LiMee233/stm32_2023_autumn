@@ -5,6 +5,10 @@ extern enum NOW_TICK_IRQ NowTickIRQ;
 uint8_t Serial_RxFlag;
 uint8_t Serial_RxData;
 
+// 波形的相关参数设置
+extern uint8_t ADC_Y_Offset;
+extern uint16_t ADC_Value_Trigger;
+
 void Serial_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure; // 定义结构体变量
@@ -70,6 +74,24 @@ void USART1_IRQHandler(void)
     if(USART_GetITStatus(USART1, USART_IT_RXNE) == SET)
     {
         Serial_RxData = USART_ReceiveData(USART1) - '0'; // 获取字符串值，转 uint8_t，意味着输入必须是表示 0~255 的字符串
+
+        // 检测到串口输入字符串
+        switch(Serial_RxData)
+        {
+            case 0:
+                ADC_Y_Offset -= 1; // 这里还缺少一些超限检查
+            break;
+            case 1:
+                ADC_Y_Offset += 1;
+            break;
+            case 2:
+                ADC_Value_Trigger -= 100;
+            break;
+            case 3:
+                ADC_Value_Trigger += 100;
+            break;
+        }
+
         Serial_RxFlag = 1;
         USART_ClearITPendingBit(USART1, USART_IT_RXNE);
     }
