@@ -3,6 +3,7 @@
 #include "oled.h"
 #include "oledfont.h"
 #include "adc.h"
+#include "dac.h"
 #include "usart.h"
 #include "exti.h"
 #include "timer.h"
@@ -29,6 +30,12 @@ int main(void)
 {
 	// 初始化 AD
 	AD_Init();
+
+	// 初始化 DA
+	DA_Init();
+	setVoltage(0.0f);
+	InitTIM2(); // 初始化定时器
+	EnableTIM2(); // 启用定时器
 
 	// 初始化串口
 	Serial_Init();
@@ -100,6 +107,8 @@ int main(void)
 
 				// 每画一个点，就将本点设置为上一个点，因为马上就要画新的了。
 				ADC_YPosition_Previous = ADC_YPosition;
+
+				delay_ms(1);
 			}
 
 			// 只有完成一次测量后，才需要将储存的图像刷新在屏幕上
