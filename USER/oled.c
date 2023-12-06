@@ -34,9 +34,11 @@ void OLED_ApplyBuffer(void)
 {
 	for(oled_i=0; oled_i<8; oled_i++)
 	{
+		OLED_WrByte(0xb0 + oled_i, OLED_WR_CMD);
+		OLED_WrByte(0x02, OLED_WR_CMD);
+		OLED_WrByte(0x10, OLED_WR_CMD);
 		for(oled_j=0; oled_j<128; oled_j++)
 		{
-			OLED_Set_Pos(oled_j, oled_i);
 			OLED_WrByte(OLED_Buffer[oled_i][oled_j], OLED_WR_DAT);
 		}
 	}
