@@ -18,6 +18,18 @@ void OLED_ClearBuffer(void)
 	}
 }
 
+// 为 OLED 缓冲区添加背景
+void OLED_FillBackgroundInBuffer(uint8_t background[8][128])
+{
+	for(i=0; i<8; i++)
+	{
+		for(j=0; j<128; j++)
+		{
+			OLED_Buffer[i][j] = background[i][j];
+		}
+	}
+}
+
 // 改变一个像素的状态
 // x：0~127；y：0~63；state：0 不亮，1 亮
 // 注意：实际上当 x=0 的时候，是不亮的，其他都亮
@@ -201,6 +213,7 @@ void OLED_DrawBMP(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, const uint8_t 
 	else
 		y = y1 / 8 + 1;
 
+	// 这里是一行一行扫描的
 	for(y=y0; y<y1; y++)
 	{
 		OLED_Set_Pos(x0, y);
