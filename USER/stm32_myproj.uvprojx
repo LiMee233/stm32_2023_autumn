@@ -439,6 +439,11 @@
               <FileType>1</FileType>
               <FilePath>..\STM32F10x_FWLib\src\stm32f10x_tim.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f10x_dac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\STM32F10x_FWLib\src\stm32f10x_dac.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -501,6 +506,11 @@
               <FileName>exti.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\exti.c</FilePath>
+            </File>
+            <File>
+              <FileName>dac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\dac.c</FilePath>
             </File>
           </Files>
         </Group>
