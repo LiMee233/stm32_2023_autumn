@@ -34,8 +34,8 @@ int main(void)
 	// 初始化 DA
 	DA_Init();
 	setVoltage(0.0f);
-	InitTIM2(); // 初始化定时器
-	EnableTIM2(); // 启用定时器
+	InitTIM3(); // 初始化定时器
+	EnableTIM3(); // 启用定时器
 
 	// 初始化串口
 	Serial_Init();
@@ -47,8 +47,8 @@ int main(void)
 
 	// 用于频率计算，依靠外部时钟，和下面的主循环似乎并没有关系
 	InitEXTI(); // 初始化外部中断
-	InitTIM3(); // 初始化定时器
-	EnableTIM3(); // 启用定时器
+	InitTIM2(); // 初始化定时器
+	EnableTIM2(); // 启用定时器
 
 	while(1){
 		// 先向缓冲区中添加背景
