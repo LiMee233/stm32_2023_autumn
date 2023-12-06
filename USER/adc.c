@@ -5,20 +5,20 @@ void AD_Init(void)
     GPIO_InitTypeDef GPIO_InitStructure;
     ADC_InitTypeDef ADC_InitStructure;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_ADC1, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_ADC1, ENABLE);
 
     RCC_ADCCLKConfig(RCC_PCLK2_Div6); // ADCCLK = 72/6 = 12MHZ
 
     ADC_DeInit(ADC1);
 
     // 在此处，使能需要测量的 IO 口，此处为 PB0
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN ;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     // 此处使用 ADC1，根据 PPT 上面的表格，可以得知 ADC_Channel_8 对应的就是 PB0
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5); // 第一个位置（序列 1 ）写入通道 8 ；采样时间是 55 个 ADCCLK 的周期；单次触发非扫描
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_55Cycles5); // 第一个位置（序列 1 ）写入通道 8 ；采样时间是 55 个 ADCCLK 的周期；单次触发非扫描
 
     // 结构体初始化 adc
     ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
@@ -40,7 +40,7 @@ void AD_Init(void)
 
 uint16_t AD_GetValue(void)
 {
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_55Cycles5);
     ADC_SoftwareStartConvCmd(ADC1, ENABLE); // 启动
     while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET) ;// 等待转换完成，分频 12Mhz * 周期
     return ADC_GetConversionValue(ADC1) & 0x0FFF; //获取转换值，不需要手动清除标志位 & 0000 1111 1111 1111
