@@ -11,11 +11,13 @@ void AD_Init(void)
 
     ADC_DeInit(ADC1);
 
+    // 在此处，使能需要测量的 IO 口，此处为 PB0
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN ;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
+    // 此处使用 ADC1，根据 PPT 上面的表格，可以得知 ADC_Channel_8 对应的就是 PB0
     ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5); // 第一个位置（序列 1 ）写入通道 8 ；采样时间是 55 个 ADCCLK 的周期；单次触发非扫描
 
     // 结构体初始化 adc
