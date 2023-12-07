@@ -5,7 +5,6 @@
 #include "adc.h"
 #include "dac.h"
 #include "usart.h"
-#include "exti.h"
 #include "timer.h"
 #include "stdio.h"
 #include "def.h"
@@ -30,29 +29,28 @@ uint16_t ADC_Value_Trigger = 0; // 边沿触发的值
 // 频率
 uint16_t adcx[NPT]; // adc 数值缓存
 extern int long fftin[NPT]; // FFT 输入
-uint16_t LastFrequency = 0;
-uint8_t LastFrequencyInString[7] = "000000";
+uint16_t Frequency = 0;
+uint8_t FrequencyInString[7] = "000000";
 
 int main(void)
 {
-	// 初始化 AD
+	// 获取信号，初始化 AD
 	AD_Init();
 
-	// 初始化 DA
+	// 发出信号，初始化 DA
 	DA_Init();
 	setVoltage(0.0f);
 	InitTIM3(); // 初始化定时器
 	EnableTIM3(); // 启用定时器
 
-	// 初始化串口
+	// 接受 USB 信息，初始化串口
 	Serial_Init();
 
-	// 初始化 OLED 所用到的 IO 口
+	// 在 OLED 上显示内容，初始化 OLED 屏幕
 	SPI_GPIO_Init();
-	// 初始化 OLED 屏
 	OLED_Init();
 
-	// 初始化测量频率的定时器
+	// 测量频率，初始化频率测量定时器
 	InitTIM2();
 	EnableTIM2();
 
@@ -153,14 +151,16 @@ int main(void)
 
 				// 每画一个点，就将本点设置为上一个点，因为马上就要画新的了。
 				ADC_YPosition_Previous = ADC_YPosition;
+
+				delay_ms(1);
 			}
 
 			// 只有完成一次测量后，才需要将储存的图像刷新在屏幕上
 			OLED_ApplyBuffer();
 
-			// 获取上一次测量的频率，并显示（应该不会覆盖掉画的图）
-			sprintf(LastFrequencyInString, "%06d", LastFrequency);
-			LCD_P8x16Str(39, 0, LastFrequencyInString);
+			// 显示测量的频率
+			sprintf(FrequencyInString, "%06d", Frequency);
+			LCD_P8x16Str(39, 0, FrequencyInString);
 		}
 
 		// 每完成一次测量，或者跳过一次测量，就将本次 ADC 最终获取的值，设置为上一次 ADC 获取的值。

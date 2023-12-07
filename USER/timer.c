@@ -71,7 +71,7 @@ void InitTIM3(void)
 	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1; // 设置了时钟分割(Tck_tim) 
 	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up; // 选择了计数器模式(TIM向上计数模式) 
 	TIM_TimeBaseInitStruct.TIM_Period = 9999; // 设定计数器自动重装值,取值范围0x0000~0xFFFF
-	TIM_TimeBaseInitStruct.TIM_Prescaler = 1; // 设置用来作为TIM3时钟频率除数的预分频值为(7199+1),取值范围0x0000~0xFFFF
+	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(8); // 设置用来作为TIM3时钟频率除数的预分频值为(7199+1),取值范围0x0000~0xFFFF
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStruct);
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); // NVIC_Group:先占优先级2位，从优先级2位
