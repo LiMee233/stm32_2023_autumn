@@ -9,8 +9,9 @@
 #include "timer.h"
 #include "stdio.h"
 #include "def.h"
+#include "fft.h"
 
-static uint8_t i = 0;
+static uint16_t i = 0; // 需要循环 256 次（含）以上，不要用 uint8_t，否则会卡死在循环里面
 
 uint8_t oled_x = 0;
 uint16_t ADC_value = 0;
@@ -27,8 +28,9 @@ uint8_t ADC_Y_Offset = 0; // 波形纵向位置的偏移
 uint16_t ADC_Value_Trigger = 0; // 边沿触发的值
 
 // 频率
-unsigned long FrequencyCounter = 0;
-unsigned long LastFrequency = 0;
+uint16_t adcx[NPT]; // adc 数值缓存
+extern int long fftin[NPT]; // FFT 输入
+uint16_t LastFrequency = 0;
 uint8_t LastFrequencyInString[7] = "000000";
 
 int main(void)
@@ -50,6 +52,10 @@ int main(void)
 	// 初始化 OLED 屏
 	OLED_Init();
 
+	// 初始化测量频率的定时器
+	InitTIM2();
+	EnableTIM2();
+
 	// 定义默认功能模式
 	NowTickIRQ = NowTickIRQ_Null;
 
@@ -57,7 +63,16 @@ int main(void)
 		// 先处理串口输入和定时器的中断
 		if(NowTickIRQ & NowTickIRQ_TIM2)
 		{
-			// 测量频率
+			// 测量频率，采样 1024 次准备 fft
+			for(i=0; i<NPT; i++)
+			{
+				adcx[i] = AD_GetValue();
+				fftin[i] = 0;
+				fftin[i] = adcx[i] << 16;
+			}
+
+			// 执行 fft
+			GetPowerMag();
 		}
 		if(NowTickIRQ & NowTickIRQ_USART1)
 		{
@@ -138,8 +153,6 @@ int main(void)
 
 				// 每画一个点，就将本点设置为上一个点，因为马上就要画新的了。
 				ADC_YPosition_Previous = ADC_YPosition;
-
-				delay_ms(1);
 			}
 
 			// 只有完成一次测量后，才需要将储存的图像刷新在屏幕上

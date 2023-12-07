@@ -1,8 +1,6 @@
 #include "stm32f10x.h"
 #include "exti.h"
 
-extern unsigned long FrequencyCounter;
-
 // 初始化外部中断
 void InitEXTI(void)
 {
@@ -64,7 +62,7 @@ void EXTI1_IRQHandler(void)
 {
 	if(EXTI_GetITStatus(EXTI_Line1) == SET)
 	{
-		FrequencyCounter++;
+		
 	}
 	EXTI_ClearITPendingBit(EXTI_Line1);
 }

@@ -1,6 +1,8 @@
 #ifndef DEF_H
 #define DEF_H
 
+#define NPT 1024 // FFT 采样次数
+
 enum NOW_TICK_IRQ
 {
 	NowTickIRQ_Null     = 0, // 0000,0000

@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD, USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\STM32F10x_FWLib\inc;..\USER</IncludePath>
+              <IncludePath>..\CORE;..\STM32F10x_FWLib\inc;..\USER;..\STM32F10x_DSPLib\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -511,6 +511,36 @@
               <FileName>dac.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\dac.c</FilePath>
+            </File>
+            <File>
+              <FileName>fft.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\fft.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>STM32F10x_DSPLib</GroupName>
+          <Files>
+            <File>
+              <FileName>cr4_fft_1024_stm32.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\STM32F10x_DSPLib\src\cr4_fft_1024_stm32.s</FilePath>
+            </File>
+            <File>
+              <FileName>cr4_fft_256_stm32.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\STM32F10x_DSPLib\src\cr4_fft_256_stm32.s</FilePath>
+            </File>
+            <File>
+              <FileName>table_fft.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\STM32F10x_DSPLib\inc\table_fft.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32_dsp.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\STM32F10x_DSPLib\inc\stm32_dsp.h</FilePath>
             </File>
           </Files>
         </Group>
