@@ -1,4 +1,5 @@
 #include "stm32f10x.h"
+#include "def.h"
 
 extern enum NOW_TICK_IRQ NowTickIRQ;
 
@@ -75,22 +76,7 @@ void USART1_IRQHandler(void)
     {
         Serial_RxData = USART_ReceiveData(USART1) - '0'; // 获取字符串值，转 uint8_t，意味着输入必须是表示 0~255 的字符串
 
-        // 检测到串口输入字符串
-        switch(Serial_RxData)
-        {
-            case 0:
-                ADC_Y_Offset -= 1; // 这里还缺少一些超限检查
-            break;
-            case 1:
-                ADC_Y_Offset += 1;
-            break;
-            case 2:
-                ADC_Value_Trigger -= 100;
-            break;
-            case 3:
-                ADC_Value_Trigger += 100;
-            break;
-        }
+        NowTickIRQ += NowTickIRQ_USART1;
 
         Serial_RxFlag = 1;
         USART_ClearITPendingBit(USART1, USART_IT_RXNE);

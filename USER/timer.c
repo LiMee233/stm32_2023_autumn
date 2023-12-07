@@ -1,6 +1,9 @@
 #include "stm32f10x.h"
 #include "timer.h"
 #include "dac.h"
+#include "def.h"
+
+extern enum NOW_TICK_IRQ NowTickIRQ;
 
 extern unsigned long FrequencyCounter;
 extern unsigned long LastFrequency;
@@ -25,7 +28,7 @@ void InitTIM2(void)
 	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInitStruct.TIM_Period = 9999;
-	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(10);
+	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(1000);
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStruct);
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
@@ -53,6 +56,7 @@ void TIM2_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM2,TIM_IT_Update) != RESET)
 	{
+		NowTickIRQ += NowTickIRQ_TIM2;
 		TIM_ClearFlag(TIM2, TIM_FLAG_Update);
 	}
 }

@@ -8,6 +8,7 @@
 #include "exti.h"
 #include "timer.h"
 #include "stdio.h"
+#include "def.h"
 
 static uint8_t i = 0;
 
@@ -16,6 +17,10 @@ uint16_t ADC_value = 0;
 uint16_t ADC_Value_Previous = 0;
 uint8_t ADC_YPosition = 0;
 uint8_t ADC_YPosition_Previous = 0;
+
+enum NOW_TICK_IRQ NowTickIRQ;
+
+extern uint8_t Serial_RxData;
 
 // 波形的相关参数设置
 uint8_t ADC_Y_Offset = 0; // 波形纵向位置的偏移
@@ -45,12 +50,38 @@ int main(void)
 	// 初始化 OLED 屏
 	OLED_Init();
 
-	// 用于频率计算，依靠外部时钟，和下面的主循环似乎并没有关系
-	InitEXTI(); // 初始化外部中断
-	InitTIM2(); // 初始化定时器
-	EnableTIM2(); // 启用定时器
+	// 定义默认功能模式
+	NowTickIRQ = NowTickIRQ_Null;
 
 	while(1){
+		// 先处理串口输入和定时器的中断
+		if(NowTickIRQ & NowTickIRQ_TIM2)
+		{
+			// 测量频率
+		}
+		if(NowTickIRQ & NowTickIRQ_USART1)
+		{
+			// 检测到串口输入字符串
+			switch(Serial_RxData)
+			{
+				case 0:
+					ADC_Y_Offset -= 1; // 这里还缺少一些超限检查
+				break;
+				case 1:
+					ADC_Y_Offset += 1;
+				break;
+				case 2:
+					ADC_Value_Trigger -= 100;
+				break;
+				case 3:
+					ADC_Value_Trigger += 100;
+				break;
+			}
+		}
+
+		// 执行过任何一个中断应执行的代码后，就将「该执行的中断代码」清空，避免重复执行
+		NowTickIRQ = NowTickIRQ_Null;
+
 		// 先向缓冲区中添加背景
 		OLED_FillBackgroundInBuffer(OLED_Background_Buffer);
 
