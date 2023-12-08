@@ -8,6 +8,7 @@ void DisableTIM2(void);
 void TIM2_IRQHandler(void);
 
 void InitTIM3(void);
+void ChangeTimeTIM3(int millisecond);
 void EnableTIM3(void);
 void DisableTIM3(void);
 void TIM3_IRQHandler(void);

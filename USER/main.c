@@ -25,6 +25,7 @@ extern uint8_t Serial_RxData;
 // 波形的相关参数设置
 uint8_t ADC_Y_Offset = 0; // 波形纵向位置的偏移
 uint16_t ADC_Value_Trigger = 0; // 边沿触发的值
+uint8_t DAC_Cycle = 8;
 
 // 频率
 uint16_t adcx[NPT]; // adc 数值缓存
@@ -34,6 +35,8 @@ uint8_t FrequencyInString[7] = "000000";
 
 int main(void)
 {
+	GPIO_InitTypeDef GPIO_InitStructure;
+	
 	// 获取信号，初始化 AD
 	AD_Init();
 
@@ -53,6 +56,15 @@ int main(void)
 	// 测量频率，初始化频率测量定时器
 	InitTIM2();
 	EnableTIM2();
+
+	// 初始化 LED 灯和蜂鸣器
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOG,ENABLE);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOG,&GPIO_InitStructure);
+	GPIO_SetBits(GPIOG, GPIO_Pin_6);
+	GPIO_ResetBits(GPIOG, GPIO_Pin_7);
 
 	// 定义默认功能模式
 	NowTickIRQ = NowTickIRQ_Null;
@@ -88,6 +100,14 @@ int main(void)
 				break;
 				case 3:
 					ADC_Value_Trigger += 100;
+				break;
+				case 4:
+					DAC_Cycle --;
+					ChangeTimeTIM3(DAC_Cycle);
+				break;
+				case 5:
+					DAC_Cycle ++;
+					ChangeTimeTIM3(DAC_Cycle);
 				break;
 			}
 		}
@@ -158,7 +178,17 @@ int main(void)
 			// 只有完成一次测量后，才需要将储存的图像刷新在屏幕上
 			OLED_ApplyBuffer();
 
-			// 显示测量的频率
+			// 报警，或显示测量的频率
+			if(Frequency > 10000)
+			{
+				GPIO_ResetBits(GPIOG, GPIO_Pin_6);
+				GPIO_SetBits(GPIOG, GPIO_Pin_7);
+			}
+			else
+			{
+				GPIO_SetBits(GPIOG, GPIO_Pin_6);
+				GPIO_ResetBits(GPIOG, GPIO_Pin_7);
+			}
 			sprintf(FrequencyInString, "%06d", Frequency);
 			LCD_P8x16Str(39, 0, FrequencyInString);
 		}

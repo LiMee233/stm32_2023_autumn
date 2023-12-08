@@ -82,6 +82,17 @@ void InitTIM3(void)
 	NVIC_Init(&NVIC_InitStructure);
 }
 
+void ChangeTimeTIM3(int millisecond)
+{
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
+	// TIM3是通用定时器，需配置TIM_ClockDivision、TIM_CounterMode、TIM_Period和TIM_Prescaler，无需配置TIM_RepetitionCounter
+	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1; // 设置了时钟分割(Tck_tim) 
+	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up; // 选择了计数器模式(TIM向上计数模式) 
+	TIM_TimeBaseInitStruct.TIM_Period = 9999; // 设定计数器自动重装值,取值范围0x0000~0xFFFF
+	TIM_TimeBaseInitStruct.TIM_Prescaler = GetPrescalerFromMillisecond(millisecond); // 设置用来作为TIM3时钟频率除数的预分频值为(7199+1),取值范围0x0000~0xFFFF
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStruct);
+}
+
 void EnableTIM3(void)
 {
 	TIM_ClearFlag(TIM3, TIM_FLAG_Update); // 清除TIM3的待处理标志位
