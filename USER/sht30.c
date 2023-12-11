@@ -9,14 +9,15 @@
  float temperatureC;
  float humidityRH;
 
- uint8_t buffer[6];
- uint8_t TemperatureInString[5] = "00.0";
+uint8_t IsTemperatureCalculated = 0;
 
- /**************************************************************************************
- * 描  述 : 向SHT30写寄存器命令
- * 入  参 : cmd: 两字节命令
- * 返回值 :   1---成功写入,     0---失败
- **************************************************************************************/
+uint8_t buffer[6];
+
+/**************************************************************************************
+* 描  述 : 向SHT30写寄存器命令
+* 入  参 : cmd: 两字节命令
+* 返回值 :   1---成功写入,     0---失败
+**************************************************************************************/
 FunctionalState SHT3X_WriteCMD(uint16_t cmd)
 {
 	if(!IIC_Start())   return DISABLE;
@@ -175,44 +176,46 @@ float SHT3X_CalcRH(uint16_t dat)
  **************************************************************************************/
 void SHT3X_TEST(void)
 {
-   uint8_t p[6],Temp1,Temp2;
-	 float cTemp,rhTemp;
-  
-   //清零数组p
-   memset(p,0,6);
-  
-	 //周期模式读出温湿度原始值，将原始值存放数组p ，存放数组对应信息格式如下：
-   //温度高8位 + 温度低8位 + 温度校验8位 + 湿度高8位 + 湿度低8位 + 湿度校验8位 
-   if(SHX3X_ReadResults(CMD_FETCH_DATA, buffer))
-	 {
-     p[0] = buffer[0];
-     p[1] = buffer[1];
-     p[2] = buffer[2];
-	  p[3] = buffer[3];
-     p[4] = buffer[4];
-     p[5] = buffer[5];
-	 }
+	uint8_t p[6], Temp1, Temp2;
+	float cTemp, rhTemp;
+
+	// 先设定温度没有计算完成
+	IsTemperatureCalculated = 0;
+
+	// 清零数组 p
+	memset(p, 0, 6);
+
+	// 周期模式读出温湿度原始值，将原始值存放数组 p，存放数组对应信息格式如下：
+	// 温度高 8 位 + 温度低 8 位 + 温度校验 8 位 + 湿度高 8 位 + 湿度低 8 位 + 湿度校验 8 位
+	if(SHX3X_ReadResults(CMD_FETCH_DATA, buffer))
+	{
+		p[0] = buffer[0];
+		p[1] = buffer[1];
+		p[2] = buffer[2];
+		p[3] = buffer[3];
+		p[4] = buffer[4];
+		p[5] = buffer[5];
+	}
 	 
    //校验读出的数据
    Temp1=SHT3x_CheckCrc(p,0,2, p[2]);
 	Temp2=SHT3x_CheckCrc(p,3,2, p[5]);
 	 
-   //根据校验结果串口上传传感器信息
-	 if(Temp1&&Temp2)
-	 {
-     Temp1=0;
-     Temp2=0;
-     
-     //计算温度原始信息，并带入算法计算出实际温度值
-     cTemp = (p[0] * 256.0) + p[1];
-	   temperatureC =SHT3X_CalcTemperature(cTemp);
+	// 读取温度信息
+	if(Temp1 && Temp2)
+	{
+		// 此时，温度计算完成
+		IsTemperatureCalculated = 1;
+
+		Temp1=0;
+		Temp2=0;
+
+		// 计算温度原始信息，并带入算法计算出实际温度值
+		cTemp = (p[0] * 256.0) + p[1];
+		temperatureC = SHT3X_CalcTemperature(cTemp);
 	 
-     //计算湿度原始信息，并带入算法计算出实际湿度值
-     rhTemp = (p[3] * 256.0) + p[4];
-	   humidityRH = SHT3X_CalcRH(rhTemp);
-		 
-		// 显示
-		sprintf(TemperatureInString, "%.1f", temperatureC);
-		LCD_P8x16Str(32, 0, TemperatureInString);
-	 }
+		// 计算湿度原始信息，并带入算法计算出实际湿度值
+		rhTemp = (p[3] * 256.0) + p[4];
+		humidityRH = SHT3X_CalcRH(rhTemp);
+	}
 }
