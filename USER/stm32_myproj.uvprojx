@@ -477,6 +477,11 @@
               <FileType>1</FileType>
               <FilePath>.\usart.c</FilePath>
             </File>
+            <File>
+              <FileName>relay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\relay.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

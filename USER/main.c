@@ -6,6 +6,7 @@
 #include "stdio.h"
 #include "def.h"
 #include "usart.h"
+#include "relay.h"
 
 static uint8_t i;
 
@@ -22,6 +23,8 @@ enum NOW_TICK_IRQ NowTickIRQ;
 
 float SetTemperature = 35.0;
 
+extern uint8_t IsRelayEnabled;
+
 int main(void)
 {
 	//初始化OLED所用到的IO口
@@ -36,6 +39,9 @@ int main(void)
 
 	// 初始化串口
 	Serial_Init();
+
+	// 初始化继电器
+	Relay_Init();
 
 	// 定义默认功能模式
 	NowTickIRQ = NowTickIRQ_Null;
@@ -89,6 +95,12 @@ int main(void)
 		LCD_P8x16Str(32, 0, TemperatureInString);
 		sprintf(TemperatureInString, "%.1f", SetTemperature);
 		LCD_P8x16Str(96, 0, TemperatureInString);
+
+		// 判断温度，操作继电器
+		if(temperatureC < SetTemperature)
+			Relay_Enable();
+		else
+			Relay_Disable();
 
 		sw_delay_ms(5);
 	}
