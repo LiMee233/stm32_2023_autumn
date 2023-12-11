@@ -4,6 +4,8 @@
 #include "user_iic.h"
 #include "sht30.h"
 #include "stdio.h"
+#include "def.h"
+#include "usart.h"
 
 static uint8_t i;
 
@@ -14,6 +16,11 @@ uint8_t TemperatureInString[5] = "00.0";
 
 extern uint8_t IsTemperatureCalculated;
 extern float temperatureC;
+
+extern uint8_t Serial_RxData;
+enum NOW_TICK_IRQ NowTickIRQ;
+
+float SetTemperature = 35.0;
 
 int main(void)
 {
@@ -27,7 +34,27 @@ int main(void)
 	IIC_GPIO_Init();
 	SHT3X_Init();
 
+	// 初始化串口
+	Serial_Init();
+
+	// 定义默认功能模式
+	NowTickIRQ = NowTickIRQ_Null;
+
 	while(1){
+		if((NowTickIRQ & NowTickIRQ_USART1) && 1)
+		{
+			switch(Serial_RxData)
+			{
+				case 1:
+					SetTemperature += 0.5;
+				break;
+				case 2:
+					SetTemperature -= 0.5;
+				break;
+			}
+		}
+		NowTickIRQ = NowTickIRQ_Null;
+
 		OLED_FillBackgroundInBuffer(OLED_Background_Buffer);
 		SHT3X_TEST();
 
@@ -60,6 +87,8 @@ int main(void)
 		// 显示温度数值
 		sprintf(TemperatureInString, "%.1f", temperatureC);
 		LCD_P8x16Str(32, 0, TemperatureInString);
+		sprintf(TemperatureInString, "%.1f", SetTemperature);
+		LCD_P8x16Str(96, 0, TemperatureInString);
 
 		sw_delay_ms(5);
 	}
