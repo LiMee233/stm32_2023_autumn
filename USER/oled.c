@@ -4,16 +4,28 @@
 
 uint8_t OLED_Buffer[8][128] = {0}; // 按照页，8 行，128 列
 
-uint8_t oled_i, oled_j;
+static uint8_t i, j;
 
 // 清空 OLED 缓冲区
 void OLED_ClearBuffer(void)
 {
-	for(oled_i=0; oled_i<8; oled_i++)
+	for(i=0; i<8; i++)
 	{
-		for(oled_j=0; oled_j<128; oled_j++)
+		for(j=0; j<128; j++)
 		{
-			OLED_Buffer[oled_i][oled_j] = 0x00;
+			OLED_Buffer[i][j] = 0x00;
+		}
+	}
+}
+
+// 为 OLED 缓冲区添加背景
+void OLED_FillBackgroundInBuffer(uint8_t background[8][128])
+{
+	for(i=0; i<8; i++)
+	{
+		for(j=0; j<128; j++)
+		{
+			OLED_Buffer[i][j] = background[i][j];
 		}
 	}
 }
@@ -32,14 +44,14 @@ void OLED_ChangeOnePixelInBuffer(uint8_t x, uint8_t y, uint8_t state)
 // 将 OLED 缓冲区内的内容显示在屏幕上（需要较长时间，此段代码可能存在性能问题，但至少功能是有的）
 void OLED_ApplyBuffer(void)
 {
-	for(oled_i=0; oled_i<8; oled_i++)
+	for(i=0; i<8; i++)
 	{
-		OLED_WrByte(0xb0 + oled_i, OLED_WR_CMD);
+		OLED_WrByte(0xb0 + i, OLED_WR_CMD);
 		OLED_WrByte(0x02, OLED_WR_CMD);
 		OLED_WrByte(0x10, OLED_WR_CMD);
-		for(oled_j=0; oled_j<128; oled_j++)
+		for(j=0; j<128; j++)
 		{
-			OLED_WrByte(OLED_Buffer[oled_i][oled_j], OLED_WR_DAT);
+			OLED_WrByte(OLED_Buffer[i][j], OLED_WR_DAT);
 		}
 	}
 }
@@ -203,6 +215,7 @@ void OLED_DrawBMP(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, const uint8_t 
 	else
 		y = y1 / 8 + 1;
 
+	// 这里是一行一行扫描的
 	for(y=y0; y<y1; y++)
 	{
 		OLED_Set_Pos(x0, y);

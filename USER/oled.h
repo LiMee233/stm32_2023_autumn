@@ -30,6 +30,7 @@
 #define Y_WIDTH      64
 
 extern void OLED_ClearBuffer(void);
+extern void OLED_FillBackgroundInBuffer(uint8_t background[8][128]);
 extern void OLED_ChangeOnePixelInBuffer(uint8_t x, uint8_t y, uint8_t state);
 extern void OLED_ApplyBuffer(void);
 

@@ -1,5 +1,6 @@
 #include "stm32f10x.h"
 #include "delay.h"
+#include "oled.h"
 
 int main(void)
 {
@@ -11,6 +12,8 @@ int main(void)
 	OLED_Fill(0x00);
 
 	while(1){
+		OLED_FillBackgroundInBuffer(OLED_Background_Buffer);
+		OLED_ApplyBuffer();
 		
 	}
 }
