@@ -482,6 +482,11 @@
               <FileType>1</FileType>
               <FilePath>.\relay.c</FilePath>
             </File>
+            <File>
+              <FileName>warn.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\warn.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

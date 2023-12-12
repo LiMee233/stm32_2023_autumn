@@ -7,6 +7,7 @@
 #include "def.h"
 #include "usart.h"
 #include "relay.h"
+#include "warn.h"
 
 static uint8_t i;
 
@@ -42,6 +43,9 @@ int main(void)
 
 	// 初始化继电器
 	Relay_Init();
+
+	// 初始化报警
+	InitWarn();
 
 	// 定义默认功能模式
 	NowTickIRQ = NowTickIRQ_Null;
@@ -102,6 +106,11 @@ int main(void)
 		else
 			Relay_Disable();
 
+		// 判断温度，并报警
+		if(temperatureC < SetTemperature - 2 || temperatureC > SetTemperature + 2)
+			EnableWarn();
+		else
+			DisableWarn();
 		sw_delay_ms(5);
 	}
 }
