@@ -65,7 +65,6 @@ int main(void)
 		}
 		NowTickIRQ = NowTickIRQ_Null;
 
-		OLED_FillBackgroundInBuffer(OLED_Background_Buffer);
 		SHT3X_TEST();
 
 		// 将测量的温度放在数组中
@@ -85,6 +84,10 @@ int main(void)
 				Temperatures[125] = temperatureC;
 			}
 		}
+		else
+			continue;
+
+		OLED_FillBackgroundInBuffer(OLED_Background_Buffer);
 
 		// 将数组的内容绘制（避开左边两个像素的坐标轴）
 		for(i=2; i<NowPointToTemperatures + 2; i++)
