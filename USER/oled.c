@@ -234,10 +234,10 @@ void OLED_Init(void)
 {    
 	OLED_RES_0; // OLED 复位引脚拉低
 	OLED_CS_1; // OLED 使能引脚置高电平
-	delay_ms(10); // 该延时必不可少,是给初始化足够的时间
+	sw_delay_ms(10); // 该延时必不可少,是给初始化足够的时间
 	OLED_RES_1; // OLED 复位引脚拉高
 	OLED_CS_0; // OLED 使能引脚置低电平
-	delay_ms(200);
+	sw_delay_ms(200);
 
 	OLED_WrByte(0xae, OLED_WR_CMD); // Turn off oled panel
 	OLED_WrByte(0x00, OLED_WR_CMD); // Set low column address

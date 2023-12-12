@@ -325,7 +325,7 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
@@ -443,11 +443,6 @@
               <FilePath>.\stm32f10x_it.c</FilePath>
             </File>
             <File>
-              <FileName>delay.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\delay.c</FilePath>
-            </File>
-            <File>
               <FileName>delay.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\delay.h</FilePath>
@@ -461,6 +456,16 @@
               <FileName>oledfont.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\oledfont.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_iic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\user_iic.c</FilePath>
+            </File>
+            <File>
+              <FileName>sht30.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\sht30.c</FilePath>
             </File>
           </Files>
         </Group>
