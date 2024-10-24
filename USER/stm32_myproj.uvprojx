@@ -462,6 +462,26 @@
               <FileType>5</FileType>
               <FilePath>.\keyboard.h</FilePath>
             </File>
+            <File>
+              <FileName>oled.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\oled.c</FilePath>
+            </File>
+            <File>
+              <FileName>oled.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\oled.h</FilePath>
+            </File>
+            <File>
+              <FileName>oledfont.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\oledfont.c</FilePath>
+            </File>
+            <File>
+              <FileName>oledfont.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\oledfont.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

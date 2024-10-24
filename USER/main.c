@@ -1,6 +1,7 @@
 #include "stm32f10x.h"
 #include "delay.h"
 #include "keyboard.h"
+#include "oled.h"
 
 int main(void)
 {
@@ -12,7 +13,14 @@ int main(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 
 	GPIO_Init(GPIOB,&GPIO_InitStructure);
+
+	// 初始化键盘
 	KeyBoardGPIOInit();
+
+	// 初始化 OLED 显示屏
+	SPI_GPIO_Init();
+	OLED_Init();
+	OLED_Fill(0x00);
 
 	while(1){
 		switch(GetKeyBoardValue())
