@@ -33,16 +33,16 @@ uint16_t GetKeyBoardValue()
     uint16_t _temp = 0;
 
     // Scan Row 1
-    GPIOA -> ODR = 0x00;
-    GPIOA -> ODR = 0xFE;
+    GPIOB -> ODR = 0x00;
+    GPIOB -> ODR = 0xFE;
 
-    if((GPIOA -> IDR & 0xF0) != 0xF0)
+    if((GPIOB -> IDR & 0xF0) != 0xF0)
     {
         delay_ms(50);
 
-        if((GPIOA -> IDR & 0xF0) != 0xF0)
+        if((GPIOB -> IDR & 0xF0) != 0xF0)
         {
-            _temp = GPIOA -> IDR & 0xFE;
+            _temp = GPIOB -> IDR & 0xFE;
             switch(_temp)
             {
                 case 0xEE:  keyBoardValue = 1; break;
@@ -55,16 +55,16 @@ uint16_t GetKeyBoardValue()
     }
 
     // Scan Row 2
-    GPIOA -> ODR = 0x00;
-    GPIOA -> ODR = 0xFD;
+    GPIOB -> ODR = 0x00;
+    GPIOB -> ODR = 0xFD;
 
-    if((GPIOA -> IDR & 0xF0) != 0xF0)
+    if((GPIOB -> IDR & 0xF0) != 0xF0)
     {
         delay_ms(50);
 
-        if((GPIOA -> IDR & 0xF0) != 0xF0)
+        if((GPIOB -> IDR & 0xF0) != 0xF0)
         {
-            _temp = GPIOA -> IDR & 0xFD;
+            _temp = GPIOB -> IDR & 0xFD;
             switch(_temp)
             {
                 case 0xED:  keyBoardValue = 5; break;
@@ -77,16 +77,16 @@ uint16_t GetKeyBoardValue()
     }
 
     // Scan Row 3
-    GPIOA -> ODR = 0x00;
-    GPIOA -> ODR = 0xFB;
+    GPIOB -> ODR = 0x00;
+    GPIOB -> ODR = 0xFB;
 
-    if((GPIOA -> IDR & 0xF0) != 0xF0)
+    if((GPIOB -> IDR & 0xF0) != 0xF0)
     {
         delay_ms(50);
 
-        if((GPIOA -> IDR & 0xF0) != 0xF0)
+        if((GPIOB -> IDR & 0xF0) != 0xF0)
         {
-            _temp = GPIOA -> IDR & 0xFB;
+            _temp = GPIOB -> IDR & 0xFB;
             switch(_temp)
             {
                 case 0xEB:  keyBoardValue = 9; break;
@@ -99,16 +99,16 @@ uint16_t GetKeyBoardValue()
     }
 
     // Scan Row 4
-    GPIOA -> ODR = 0x00;
-    GPIOA -> ODR = 0xF7;
+    GPIOB -> ODR = 0x00;
+    GPIOB -> ODR = 0xF7;
 
-    if((GPIOA -> IDR & 0xF0) != 0xF0)
+    if((GPIOB -> IDR & 0xF0) != 0xF0)
     {
         delay_ms(50);
 
-        if((GPIOA -> IDR & 0xF0) != 0xF0)
+        if((GPIOB -> IDR & 0xF0) != 0xF0)
         {
-            _temp = GPIOA -> IDR & 0xF7;
+            _temp = GPIOB -> IDR & 0xF7;
             switch(_temp)
             {
                 case 0xE7:  keyBoardValue = 13; break;

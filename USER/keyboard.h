@@ -4,9 +4,9 @@
 #define _KEYBOARD_H_
 
 // GPIO Port
-#define KEYBOARD_GPIO_PORT              GPIOA
+#define KEYBOARD_GPIO_PORT              GPIOB
 #define KEYBOARD_GPIO_CLK_FUN           RCC_APB2PeriphClockCmd
-#define KEYBOARD_GPIO_CLK               RCC_APB2Periph_GPIOA
+#define KEYBOARD_GPIO_CLK               RCC_APB2Periph_GPIOB
 
 // Row
 #define KEYBOARD_ROW0_GPIO_PIN          GPIO_Pin_0
