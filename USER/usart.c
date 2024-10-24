@@ -56,7 +56,8 @@ void USART1_Init(void)
 }
 
 void USART1_Send(uint8_t *data, uint16_t len) {
-    for (uint16_t i = 0; i < len; i++) {
+    uint16_t i;
+    for (i = 0; i < len; i++) {
         // 发送一个字节
         USART_SendData(USART1, data[i]);
 
@@ -88,9 +89,10 @@ void USART2_Init(void)
     USART_InitTypeDef USART_InitStructure;
 
     RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOB |
-                            RCC_APB2Periph_AFIO |
-                            RCC_APB2Periph_USART3 ,
+                            RCC_APB2Periph_AFIO ,
                             ENABLE);
+
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 
     // PB10 & PB11 是 USART3 的 TX 和 RX
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -127,7 +129,8 @@ void USART2_Init(void)
 }
 
 void USART2_Send(uint8_t *data, uint16_t len) {
-    for (uint16_t i = 0; i < len; i++) {
+    uint16_t i;
+    for (i = 0; i < len; i++) {
         // 发送一个字节
         USART_SendData(USART2, data[i]);
 
