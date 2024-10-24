@@ -2,6 +2,9 @@
 #include "delay.h"
 #include "keyboard.h"
 #include "oled.h"
+#include "timer.h"
+
+uint32_t secondsInDay = 0;
 
 int main(void)
 {
@@ -22,6 +25,10 @@ int main(void)
 	OLED_Init();
 	OLED_Fill(0x00);
 
+	// 初始化时钟
+	InitTIM2();
+	EnableTIM2();
+
 	while(1){
 		switch(GetKeyBoardValue())
 		{
@@ -32,5 +39,14 @@ int main(void)
 				GPIO_ResetBits(GPIOB,GPIO_Pin_8);
 			break;
 		}
+	}
+}
+
+void TIM2_IRQHandler(void)
+{
+	if(TIM_GetITStatus(TIM2,TIM_IT_Update) != RESET)
+	{
+		secondsInDay = secondsInDay > 86400 ? 0 : secondsInDay + 1;
+		TIM_ClearFlag(TIM2, TIM_FLAG_Update);
 	}
 }
