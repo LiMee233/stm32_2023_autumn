@@ -29,6 +29,10 @@ int main(void)
 	InitTIM2();
 	EnableTIM2();
 
+	// 初始化串口
+	USART1_Init();
+	USART2_Init();
+
 	while(1){
 		switch(GetKeyBoardValue())
 		{
