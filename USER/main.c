@@ -3,6 +3,7 @@
 #include "keyboard.h"
 #include "oled.h"
 #include "timer.h"
+#include "usart.h"
 
 uint32_t secondsInDay = 0;
 
@@ -11,11 +12,11 @@ int main(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 
-	GPIO_Init(GPIOB,&GPIO_InitStructure);
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	// 初始化键盘
 	KeyBoardGPIOInit();
@@ -33,14 +34,15 @@ int main(void)
 	USART1_Init();
 	USART2_Init();
 
-	while(1){
+	while(1)
+	{
 		switch(GetKeyBoardValue())
 		{
 			case 1:
-				GPIO_SetBits(GPIOB,GPIO_Pin_8);
+				GPIO_SetBits(GPIOA, GPIO_Pin_0);
 			break;
 			case 2:
-				GPIO_ResetBits(GPIOB,GPIO_Pin_8);
+				GPIO_ResetBits(GPIOA, GPIO_Pin_0);
 			break;
 		}
 	}
