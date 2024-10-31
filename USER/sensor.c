@@ -64,3 +64,14 @@ void RefreshSN300BYHM()
     delay_ms(100);
     APResult = ((uint16_t)((usart1_rx_buffer[3] << 8) | usart1_rx_buffer[4]));
 }
+
+double getpH()
+{
+    return (adc_values[0] / 4096) * 4.24 + (adc_values[1] / 4096) / 298.0;
+}
+
+// LiquidLevel (m)
+double getLiquidLevel()
+{
+    return ((adc_values[2] / 4096) * 3.3 - 0.6) / 2.7;
+}
