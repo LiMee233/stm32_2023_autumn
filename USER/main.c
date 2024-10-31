@@ -5,6 +5,7 @@
 #include "timer.h"
 #include "usart.h"
 #include "adc.h"
+#include "sensor.h"
 
 uint32_t secondsInDay = 0;
 
@@ -60,7 +61,13 @@ void TIM2_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM2,TIM_IT_Update) != RESET)
 	{
+		// Update clock
 		secondsInDay = secondsInDay > 86400 ? 0 : secondsInDay + 1;
+
+		// Tick sensor
+		RefreshSN3002ECN01();
+		RefreshSN300BYHM();
+
 		TIM_ClearFlag(TIM2, TIM_FLAG_Update);
 	}
 }
