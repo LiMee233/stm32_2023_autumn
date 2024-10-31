@@ -17,6 +17,8 @@ uint8_t pageIndex = 0;
 char nowInputing[8] = '\0';
 
 uint8_t isWarning = 0;
+uint8_t WarningCounter = 0;
+uint8_t openFan = 0;
 
 extern uint16_t adc_values[3];
 
@@ -42,6 +44,9 @@ int len = 0;
 
 int main(void)
 {
+	// Defination
+	GPIO_InitTypeDef GPIO_InitStructure;
+
 	// Initilize Keyboard
 	KeyBoardGPIOInit();
 
@@ -59,8 +64,37 @@ int main(void)
 	// Initilize OLED
 	OLED_Init();
 
+	// Initilize Output
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+
+	GPIO_InitStructure.GPIO_Pin = 	GPIO_Pin_6 |
+									GPIO_Pin_7 |
+									GPIO_Pin_8 |
+									GPIO_Pin_12 |
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = 	GPIO_Pin_8 |
+									GPIO_Pin_9 |
+									GPIO_Pin_10 |
+									GPIO_Pin_11 |
+									GPIO_Pin_12 |
+									GPIO_Pin_13 |
+									GPIO_Pin_14 |
+									GPIO_Pin_15;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = 	GPIO_Pin_10 |
+									GPIO_Pin_11 |
+									GPIO_Pin_12 |
+									GPIO_Pin_13;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
 	while(1)
 	{
+		// Switch key value
 		switch(GetKeyBoardValue())
 		{
 			case 1:
@@ -127,6 +161,7 @@ int main(void)
 			break;
 
 			case 16:
+				// Enter UserInputing
 				switch(pageIndex)
 				{
 					// CO2
@@ -296,6 +331,108 @@ int main(void)
 			break;
 		}
 
+#pragma region
+		// Compare
+		isWarning = 0;
+
+		// CO2
+		if(CO2Set > CO2Result + 100)
+		{
+			isWarning = 1;
+			GPIO_SetBits(GPIOC, GPIO_Pin_13);
+			openFan = openFan | 0;
+		}
+		else if(CO2Result < CO2Set - 100)
+		{
+			isWarning = 1;
+			openFan = openFan | 1;
+			GPIO_ResetBits(GPIOC, GPIO_Pin_13);
+		}
+
+		// Humidity
+		if(HResult > HSet + 0.5)
+		{
+			isWarning = 1;
+			openFan = openFan | 1;
+		}
+		else if(HResult < HSet - 0.5)
+		{
+			isWarning = 1;
+			GPIO_SetBits(GPIOC, GPIO_Pin_11);
+		}
+
+		// LiquidLevel
+		if(getLiquidLevel() < LiquidLevelSet - 0.05)
+		{
+			isWarning = 1;
+			GPIO_SetBits(GPIOB, GPIO_Pin_11);
+		}
+		else
+		{
+			GPIO_ResetBits(GPIOB, GPIO_Pin_11);
+		}
+
+		// pH
+		if(getpH() > pHSet + 0.2)
+		{
+			isWarning = 1;
+			GPIO_SetBits(GPIOB, GPIO_Pin_13);
+			GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		}
+		else if(getpH() < pHSet - 0.2)
+		{
+			isWarning = 1;
+			GPIO_SetBits(GPIOB, GPIO_Pin_12);
+			GPIO_ResetBits(GPIOB, GPIO_Pin_13);
+		}
+
+		// EC
+		if(ECResult > ECSet + 0.3)
+		{
+			isWarning = 1;
+			GPIO_SetBits(GPIOB, GPIO_Pin_15);
+			GPIO_ResetBits(GPIOB, GPIO_Pin_14);
+		}
+		else if(ECResult < ECSet - 0.3)
+		{
+			isWarning = 1;
+			GPIO_SetBits(GPIOB, GPIO_Pin_14);
+			GPIO_ResetBits(GPIOB, GPIO_Pin_15);
+		}
+
+		// Temperature
+		if(TResult > TSet + 2)
+		{
+			isWarning = 1;
+			GPIO_SetBits(GPIOA, GPIO_Pin_7);
+			GPIO_ResetBits(GPIOA, GPIO_Pin_6);
+		}
+		else if(TResult < TSet - 2)
+		{
+			isWarning = 1;
+			GPIO_SetBits(GPIOA, GPIO_Pin_6);
+			GPIO_ResetBits(GPIOA, GPIO_Pin_7);
+		}
+
+		// LUX
+		if(LUXResult > LUXSet + 50)
+		{
+			isWarning = 1;
+			GPIO_ResetBits(GPIOB, GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10);
+		}
+		else if(LUXResult < LUXSet - 50)
+		{
+			isWarning = 1;
+			GPIO_SetBits(GPIOB, GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10);
+		}
+#pragma endregion
+
+		// Control Fan
+		if(openFan)
+			GPIO_SetBits(GPIOC, GPIO_Pin_10);
+		else
+			GPIO_ResetBits(GPIOC, GPIO_Pin_10);
+
 		if(pageIndex != 8)
 		{
 			// Show time in bottom
@@ -322,6 +459,17 @@ void TIM2_IRQHandler(void)
 		// Tick sensor
 		RefreshSN3002ECN01();
 		RefreshSN300BYHM();
+
+		// Warning Control
+		if(isWarning)
+			WarningCounter ++;
+		else
+			WarningCounter = 0;
+
+		if(WarningCounter >= 30 * 60)
+			GPIO_SetBits(GPIOC, GPIO_Pin_12);
+		else
+			GPIO_ResetBits(GPIOC, GPIO_Pin_12);
 
 		TIM_ClearFlag(TIM2, TIM_FLAG_Update);
 	}
