@@ -13,6 +13,23 @@ extern uint16_t adc_values[3];
 
 int main(void)
 {
+	// Initilize Keyboard
+	KeyBoardGPIOInit();
+
+	// Initilize A/D C
+	AD_Init();
+
+	// Initilize usart
+	USART1_Init();
+	USART2_Init();
+
+	// Initilize & Enable Timer
+	InitTIM2();
+	EnableTIM2();
+
+	// Initilize OLED
+	OLED_Init();
+
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
 
@@ -25,11 +42,6 @@ int main(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	// 初始化键盘
-	KeyBoardGPIOInit();
-
-	AD_Init();
 
 	while(1)
 	{
