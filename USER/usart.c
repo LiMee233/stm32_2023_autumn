@@ -1,14 +1,11 @@
 #include "stm32f10x.h"
 #include "usart.h"
 
-#define BUFFER_SIZE 64
 uint8_t usart1_rx_buffer[BUFFER_SIZE];  // USART1 接收缓冲区
 volatile uint16_t usart1_rx_index = 0;  // 当前 USART1 缓冲区索引
 
 uint8_t usart2_rx_buffer[BUFFER_SIZE];  // USART2 接收缓冲区
 volatile uint16_t usart2_rx_index = 0;  // 当前 USART2 缓冲区索引
-
-uint8_t frame[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x00, 0xc4, 0x0b};
 
 void USART1_Init(void)
 {
