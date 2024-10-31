@@ -542,6 +542,16 @@
               <FileType>5</FileType>
               <FilePath>.\sensor.h</FilePath>
             </File>
+            <File>
+              <FileName>assist.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\assist.c</FilePath>
+            </File>
+            <File>
+              <FileName>assist.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\assist.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

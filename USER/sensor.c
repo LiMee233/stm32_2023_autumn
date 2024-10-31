@@ -8,6 +8,8 @@ extern volatile uint16_t usart1_rx_index;
 extern uint8_t usart2_rx_buffer[BUFFER_SIZE];
 extern volatile uint16_t usart2_rx_index;
 
+extern uint16_t adc_values[3];
+
 uint8_t ECSendFrame[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x00, 0xc4, 0x0b};
 double ECResult = 0;
 
