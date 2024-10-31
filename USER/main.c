@@ -7,6 +7,7 @@
 #include "adc.h"
 #include "sensor.h"
 #include "assist.h"
+#include <stdio.h>
 
 uint8_t MAX_PAGE_INDEX = 9;
 uint8_t MAX_NOW_INPUTING_LENGHT = 8;
@@ -25,6 +26,15 @@ extern double HResult;
 extern uint8_t CO2Result;
 extern double APResult;
 extern uint16_t LUXResult;
+
+double ECSet = 0;
+double TSet = 0;
+double HSet = 0;
+uint8_t CO2Set = 0;
+double APSet = 0;
+uint16_t LUXSet = 0;
+double LiquidLevelSet = 0;
+double pHSet = 0;
 
 void CleanNowInputing();
 
@@ -121,7 +131,40 @@ int main(void)
 				{
 					// CO2
 					case 1:
+						CO2Set = atoi(nowInputing);
+					break;
 
+					// Humidity
+					case 2:
+						HSet = strtod(nowInputing);
+					break;
+
+					// LiquidLevel
+					case 3:
+						LiquidLevelSet = strtod(nowInputing);
+					break;
+
+					// pH
+					case 4:
+						pHSet = strtod(nowInputing);
+					break;
+
+					// EC
+					case 5:
+						ECSet = strtod(nowInputing);
+					break;
+
+					// Temperature
+					case 6:
+						TSet = strtod(nowInputing);
+					break;
+
+					// LUX
+					case 7:
+						LUXSet = atol(nowInputing);
+					break;
+
+					default:
 					break;
 				}
 			break;
